@@ -27,12 +27,14 @@ button, select, input { font: inherit; }
 button { cursor: pointer; }
 .hidden { display: none !important; }
 .eyebrow { margin: 0; color: var(--gold); font-size: .76rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.version { margin-left: 5px; color: #9a948b; font: 700 .64rem/1 ui-sans-serif, system-ui, sans-serif; letter-spacing: .03em; text-transform: none; }
 h1, h2, h3, p { margin-top: 0; }
 h1 { margin-bottom: 4px; font: 700 clamp(1.5rem, 3vw, 2.35rem)/1.1 Georgia, serif; }
-.setup-shell { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
-.setup-card { width: min(720px, 100%); padding: clamp(28px, 6vw, 64px); border: 1px solid var(--line); background: rgba(255,253,248,.94); box-shadow: var(--shadow); }
+.setup-shell { height: 100dvh; display: grid; place-items: center; padding: 20px; overflow: hidden; }
+.setup-card { width: min(900px, 100%); padding: clamp(26px, 4vw, 48px); border: 1px solid var(--line); background: rgba(255,253,248,.94); box-shadow: var(--shadow); }
 .lede { color: var(--muted); font-size: 1.08rem; }
-.setup-grid { display: grid; gap: 16px; margin: 32px 0; }
+.setup-note { margin: -10px 0 20px; color: var(--muted); font-size: .82rem; }
+.setup-grid { display: grid; grid-template-columns: .7fr 1fr 1.8fr; gap: 16px; margin: 24px 0; }
 label { display: grid; gap: 6px; font-weight: 700; }
 select, input { min-height: 44px; border: 1px solid var(--line); border-radius: 8px; background: white; padding: 9px 12px; color: var(--ink); }
 button { border: 0; border-radius: 999px; padding: 9px 15px; font-weight: 800; color: var(--ink); background: #e7e0d5; }
@@ -79,8 +81,9 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 .artist-count { display: flex; gap: 3px; margin-top: 8px; min-height: 7px; }
 .artist-count i { width: 14px; height: 6px; border-radius: 3px; background: var(--artist); }
 .table { display: grid; grid-template-rows: auto minmax(280px, auto) auto; gap: 12px; padding: 16px 0 50px; }
-.opponents { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.opponents { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
 .player, .player-area, .stage { border: 1px solid var(--line); background: rgba(255,253,248,.92); box-shadow: 0 5px 18px rgba(45,38,28,.07); border-radius: 14px; }
+.player-area.current-hand { outline: 3px solid #dca652; background: #fffaf0; box-shadow: 0 8px 24px rgba(182,121,50,.16); }
 .player { padding: 10px 12px; }
 .player.current { outline: 3px solid #dca652; }
 .player.seller { background: #fff9e9; }
@@ -91,6 +94,9 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 .avatar-wrap i { display: none; position: absolute; right: -8px; bottom: -6px; font-style: normal; font-size: 1rem; filter: none; }
 .avatar-wrap.awake { filter: none; opacity: 1; transform: translateY(-2px) scale(1.06); box-shadow: 0 0 0 3px #e3af5d, 0 5px 12px rgba(0,0,0,.15); }
 .avatar-wrap.awake i { display: block; }
+.you-avatar { display: grid; place-items: center; flex: 0 0 44px; width: 44px; height: 44px; border-radius: 50%; background: var(--ink); color: white; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,.15); font-size: .58rem; font-weight: 900; }
+.you-avatar.awake { box-shadow: 0 0 0 3px #e3af5d, 0 5px 12px rgba(0,0,0,.15); transform: translateY(-2px); }
+.player-event { margin-top: 9px; padding: 6px 9px; border-radius: 7px; background: #f1eadc; color: #5a4a32; font-size: .72rem; font-weight: 900; }
 .player-head { display: flex; justify-content: space-between; gap: 8px; }
 .player-head strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .seller-badge { display: inline-block; margin-left: 8px; padding: 2px 7px; border-radius: 99px; background: var(--gold); color: white; font-size: .58rem; letter-spacing: .08em; vertical-align: 2px; }
@@ -124,10 +130,14 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 .forecast-now { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 9px 0 3px; }
 .forecast-now strong { font: 700 2rem/1 Georgia, serif; }
 .forecast-now span { font-size: 1.25rem; font-weight: 900; color: #23704d; }
+.pair-total { display: grid; gap: 3px; margin: 12px 0; padding: 11px; border-radius: 8px; background: color-mix(in srgb, var(--artist) 16%, white); }
+.pair-total span { color: var(--muted); font-size: .78rem; }
+.pair-total strong { font-size: 1.08rem; }
 .value-forecast > p:not(.eyebrow) { color: var(--muted); font-size: .78rem; }
 .possible-values { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 16px 0 9px; }
 .possible-values span { display: grid; gap: 2px; padding: 8px 4px; border-radius: 7px; background: #f3eee6; text-align: center; font-weight: 900; }
 .possible-values b { color: var(--muted); font-size: .65rem; }
+.possible-values small { color: var(--muted); font-size: .58rem; font-weight: 700; }
 .value-forecast > small { color: var(--muted); }
 .auction-copy { font-size: 1.05rem; font-weight: 800; }
 .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; }
@@ -136,8 +146,9 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 .player-area { padding: 12px 14px; }
 .your-summary { display: flex; justify-content: space-between; align-items: center; gap: 14px; }
 .section-note { display: block; margin-top: 2px; color: var(--muted); }
-.hand-heading { display: flex; justify-content: space-between; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.hand-heading { display: flex; justify-content: space-between; gap: 12px; align-items: end; }
 .hand-heading span { color: var(--muted); font-size: .78rem; }
+.your-turn-badge { display: inline-block; margin-left: 7px; padding: 3px 7px; border-radius: 99px; background: var(--gold); color: white !important; font-size: .58rem !important; letter-spacing: .08em; vertical-align: 2px; }
 .hand { display: flex; gap: 10px; overflow-x: auto; padding: 12px 2px 8px; scroll-snap-type: x proximity; }
 .hand-card { position: relative; flex: 0 0 118px; height: 150px; padding: 9px; border: 6px solid white; border-radius: 4px; background: linear-gradient(to bottom, rgba(0,0,0,.05) 36%, rgba(0,0,0,.82)), var(--art) center/cover; color: white; text-align: left; text-shadow: 0 1px 3px #000; box-shadow: 0 7px 14px rgba(0,0,0,.16); scroll-snap-align: start; }
 .hand-card:hover { transform: translateY(-7px) rotate(-1deg); }
@@ -151,10 +162,17 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 .dialog-close { float: right; font-size: 1.4rem; }
 .help-types { display: grid; gap: 8px; margin: 18px 0; }
 .help-type { display: grid; grid-template-columns: 38px 120px 1fr; gap: 8px; align-items: center; padding: 8px; background: var(--paper); border-radius: 8px; }
+.history-list { display: grid; gap: 9px; max-height: min(65vh, 580px); overflow-y: auto; padding-right: 4px; }
+.history-item { display: grid; gap: 4px; padding: 12px 14px; border: 1px solid var(--line); border-left: 5px solid var(--artist, var(--gold)); border-radius: 8px; background: var(--paper); }
+.history-item > span:last-child { color: var(--muted); font-size: .82rem; }
+.history-round { color: var(--gold); font-size: .65rem; font-weight: 900; letter-spacing: .09em; text-transform: uppercase; }
+.round-history { --artist: var(--gold); }
 .toast { position: fixed; z-index: 10; left: 50%; bottom: 18px; transform: translate(-50%, 20px); padding: 10px 16px; border-radius: 99px; background: var(--ink); color: white; opacity: 0; pointer-events: none; transition: .2s; }
 .toast.show { transform: translate(-50%, 0); opacity: 1; }
 
 @media (max-width: 850px) {
+  .setup-shell { height: auto; min-height: 100dvh; overflow: auto; }
+  .setup-grid { grid-template-columns: 1fr; }
   .auction-guide { display: flex; overflow-x: auto; }
   .guide-item { flex: 0 0 150px; }
   .opponents { grid-template-columns: repeat(2, 1fr); }
@@ -165,11 +183,37 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 }
 @media (max-width: 520px) {
   .game { padding: 10px; }
-  .topbar { align-items: flex-start; }
-  .quiet { padding: 7px 9px; font-size: .78rem; }
-  .opponents { display: flex; overflow-x: auto; }
-  .player { min-width: 190px; }
+  .topbar { align-items: flex-start; margin-bottom: 9px; }
+  .topbar h1 { font-size: 1.65rem; }
+  .top-actions { flex-wrap: wrap; justify-content: flex-end; gap: 5px; }
+  .quiet { min-height: 38px; padding: 7px 9px; font-size: .73rem; }
+  .market-grid { grid-template-columns: 88px repeat(5, 108px); min-width: 628px; }
+  .market-cell, .market-label { padding: 5px 7px; }
+  .market-cell.round-count { min-height: 66px; }
+  .market-label span { font-size: .65rem; }
+  .opponents { display: flex; overflow-x: auto; padding: 3px; scroll-snap-type: x mandatory; }
+  .player { min-width: min(78vw, 260px); scroll-snap-align: start; }
+  .avatar-wrap { flex-basis: 40px; width: 40px; height: 40px; }
+  .table { gap: 9px; padding-top: 10px; }
+  .stage { min-height: 0; padding: 16px 10px; }
+  .stage-layout { gap: 18px; }
   .auction-card { width: 145px; height: 180px; }
+  .auction-source { max-width: 92%; }
+  .instruction { margin-bottom: 10px; }
+  .bid-row { flex-wrap: wrap; }
+  .bid-row input { width: 96px; }
+  .bid-row button, .actions button { min-height: 44px; }
+  .value-forecast { padding: 15px; }
+  .forecast-now strong { font-size: 1.6rem; }
+  .forecast-now span { font-size: 1.05rem; }
+  .your-summary { align-items: flex-start; }
+  .your-summary > div:first-child { min-width: 0; }
+  .hand-heading { align-items: baseline; }
+  .hand-card { flex-basis: 104px; height: 136px; }
+  .mini-art { width: 50px; height: 64px; }
+  dialog { padding: 20px 16px; }
+  .help-type { grid-template-columns: 30px 92px 1fr; font-size: .8rem; }
+  .toast { width: calc(100% - 24px); text-align: center; }
 }
 
 </style>
@@ -178,7 +222,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
   <div id="setup" class="setup-shell">
     <section class="setup-card">
       <p class="eyebrow">A game of taste, timing, and terrible investments</p>
-      <h1>Modern Art</h1>
+      <h1>Modern Art <span class="version" data-version></span></h1>
       <p class="lede">Buy emerging art. Shape the market. Try not to applaud your own bid.</p>
       <div class="setup-grid">
         <label>Players
@@ -198,6 +242,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
           </select>
         </label>
       </div>
+      <p class="setup-note">The first auctioneer is chosen randomly.</p>
       <button id="start-game" class="primary big">Enter the gallery</button>
       <button id="continue-game" class="quiet big hidden">Continue saved game</button>
     </section>
@@ -206,10 +251,11 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
   <main id="game" class="game hidden">
     <header class="topbar">
       <div>
-        <p class="eyebrow">Modern Art</p>
+        <p class="eyebrow">Modern Art <span class="version" data-version></span></p>
         <h1 id="round-title">Round 1 of 4</h1>
       </div>
       <div class="top-actions">
+        <button id="history-button" class="quiet">History <span id="history-count"></span></button>
         <button id="help-button" class="quiet">How to play</button>
         <button id="new-game" class="quiet">New game</button>
       </div>
@@ -218,8 +264,8 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
     <section id="market" class="market" aria-label="Artist market"></section>
 
     <section class="table">
-      <div id="opponents" class="opponents"></div>
       <div id="stage" class="stage"></div>
+      <div id="opponents" class="opponents"></div>
       <div id="you" class="player-area"></div>
     </section>
   </main>
@@ -232,8 +278,15 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
     <p>When the fifth painting by any artist reaches the market, the round ends immediately. The three most fashionable artists pay $30, $20, and $10 per painting. Their values accumulate over four rounds.</p>
   </dialog>
 
+  <dialog id="history-dialog">
+    <button class="dialog-close history-close" aria-label="Close">×</button>
+    <h2>Game history</h2>
+    <div id="history-list" class="history-list"></div>
+  </dialog>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
+const VERSION = "0.5.0";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -280,21 +333,24 @@ function makeDeck() {
 function startGame() {
   const count = +$("#player-count").value;
   state = {
-    round: 1, turn: 0, phase: "choose", rule: $("#rule-set").value,
+    round: 1, turn: Math.floor(Math.random() * count), phase: "choose", rule: $("#rule-set").value,
     deck: makeDeck(), marketValues: Object.fromEntries(ARTISTS.map(a => [a.id, 0])),
     tableCounts: Object.fromEntries(ARTISTS.map(a => [a.id, 0])),
     roundHistory: [],
+    history: [],
     auction: null, message: "Choose a painting from your hand to begin the auction.",
     players: Array.from({ length: count }, (_, i) => ({
       id: i, name: i === 0 ? "You" : AI_PEOPLE[i - 1].name,
       avatar: i === 0 ? null : AI_PEOPLE[i - 1].avatar,
-      human: i === 0, cash: 100, hand: [], collection: [], passed: false
+      human: i === 0, cash: 100, hand: [], collection: [], passed: false, status: ""
     }))
   };
   deal(roundDealCount());
+  state.message = `${current().name} was randomly chosen to start.`;
   $("#setup").classList.add("hidden");
   $("#game").classList.remove("hidden");
   render();
+  if (!current().human) setTimeout(aiChoose, 900);
 }
 
 function roundDealCount() {
@@ -330,7 +386,9 @@ function launchCard(player, cardId) {
   const index = player.hand.findIndex(c => c.id === cardId);
   if (index < 0) return;
   const card = player.hand.splice(index, 1)[0];
-  state.auction = { card, seller: player.id, cards: [card], bid: 0, bidder: null, acted: [], cursor: (player.id + 1) % state.players.length };
+  state.players.forEach(p => p.status = "");
+  player.status = `Selling ${artist(card.artist).name} · ${TYPES[card.type].name}`;
+  state.auction = { card, originalType: card.type, seller: player.id, cards: [card], bid: 0, bidder: null, acted: [], cursor: (player.id + 1) % state.players.length };
   state.tableCounts[card.artist]++;
   if (state.tableCounts[card.artist] >= 5) return endRound(card);
   state.phase = card.type === "double" ? "double" : card.type;
@@ -388,12 +446,14 @@ function placeBid(p, amount) {
   if (amount <= state.auction.bid || amount > p.cash) return toast("Bid must be higher and within your cash.");
   state.auction.bid = amount;
   state.auction.bidder = p.id;
+  p.status = `Bid ${money(amount)}`;
   if (state.auction.card.type === "once") state.auction.acted.push(p.id);
   state.auction.cursor = (p.id + 1) % state.players.length;
   auctionTurn();
 }
 
 function passBid(p) {
+  p.status = "Passed";
   if (state.auction.card.type === "once") state.auction.acted.push(p.id);
   else p.passed = true;
   state.auction.cursor = (p.id + 1) % state.players.length;
@@ -402,7 +462,10 @@ function passBid(p) {
 
 function sealedStep() {
   state.players.forEach(p => {
-    if (!p.human) state.auction.secret[p.id] = Math.min(p.cash, Math.max(0, estimateValue(state.auction.card.artist) + Math.floor(Math.random() * 13) - 6));
+    if (!p.human) {
+      state.auction.secret[p.id] = Math.min(p.cash, Math.max(0, estimateValue(state.auction.card.artist) + Math.floor(Math.random() * 13) - 6));
+      p.status = "Secret bid locked";
+    }
   });
   state.message = "Choose your private bid. The other bids are already locked in.";
   render();
@@ -413,6 +476,7 @@ function submitSecret(amount) {
   amount = Math.floor(+amount);
   if (amount < 0 || amount > p.cash) return toast("Choose an amount you can afford.");
   state.auction.secret[0] = amount;
+  p.status = "Secret bid locked";
   const bids = Object.entries(state.auction.secret).sort((a, b) => b[1] - a[1] || a[0] - b[0]);
   state.auction.bidder = +bids[0][0];
   state.auction.bid = bids[0][1];
@@ -467,6 +531,7 @@ function nextFixedOffer() {
 }
 
 function fixedDecision(accept) {
+  state.players[0].status = accept ? `Accepted ${money(state.auction.bid)}` : "Passed";
   if (accept) state.auction.bidder = 0;
   if (accept) resolveAuction();
   else {
@@ -528,7 +593,9 @@ function resolveAuction() {
   const seller = state.players[a.seller];
   if (a.bidder === null) {
     seller.collection.push(...a.cards);
+    seller.status = `Kept ${artist(a.card.artist).name} for free`;
     toast(`No buyer. ${seller.name} keeps the painting${a.cards.length > 1 ? "s" : ""}.`);
+    state.history.push({ kind: "auction", round: state.round, artist: a.card.artist, auctionType: a.originalType, seller: seller.name, buyer: seller.name, price: 0, quantity: a.cards.length });
   } else {
     const buyer = state.players[a.bidder];
     buyer.cash -= a.bid;
@@ -540,7 +607,10 @@ function resolveAuction() {
       } else seller.cash += a.bid;
     }
     buyer.collection.push(...a.cards);
+    buyer.status = `Bought ${a.cards.length > 1 ? "the pair" : artist(a.card.artist).name} for ${money(a.bid)}`;
+    if (buyer.id !== seller.id) seller.status = `Sold for ${money(a.bid)}`;
     toast(`${buyer.human ? "You buy" : `${buyer.name} buys`} ${a.cards.length > 1 ? "the pair" : "it"} for ${money(a.bid)}.`);
+    state.history.push({ kind: "auction", round: state.round, artist: a.card.artist, auctionType: a.originalType, seller: seller.name, buyer: buyer.name, price: a.bid, quantity: a.cards.length });
   }
   if (a.matchingSeller !== undefined) state.turn = a.matchingSeller;
   setTimeout(nextTurn, 700);
@@ -550,12 +620,19 @@ function endRound(triggerCard) {
   const ranked = [...ARTISTS].sort((a, b) => state.tableCounts[b.id] - state.tableCounts[a.id] || ARTISTS.indexOf(a) - ARTISTS.indexOf(b));
   [30, 20, 10].forEach((value, i) => state.marketValues[ranked[i].id] += value);
   state.roundHistory.push({ ...state.tableCounts });
+  const payouts = {};
   state.players.forEach(p => {
     const payout = p.collection.reduce((sum, c) => sum + state.marketValues[c.artist], 0);
+    payouts[p.name] = payout;
     p.cash += payout;
     p.collection = [];
   });
   const summary = ranked.slice(0, 3).map((a, i) => `${a.name} +${[30,20,10][i]}`).join(" · ");
+  state.history.push({
+    kind: "round", round: state.round,
+    leaders: ranked.slice(0, 3).map((a, i) => ({ artist: a.id, bonus: [30,20,10][i], value: state.marketValues[a.id] })),
+    payouts
+  });
   if (state.round === 4) {
     state.phase = "gameover";
     const winner = [...state.players].sort((a,b) => b.cash - a.cash)[0];
@@ -585,6 +662,7 @@ function aiChoose() {
 
 function render() {
   state.roundHistory ||= [];
+  state.history ||= [];
   state.players.forEach(p => {
     if (!p.human && !p.avatar) p.avatar = AI_PEOPLE.find(ai => ai.name === p.name)?.avatar;
   });
@@ -595,6 +673,27 @@ function render() {
   renderPlayers();
   renderStage();
   renderYou();
+  renderHistory();
+}
+
+function renderHistory() {
+  $("#history-count").textContent = state.history.length ? `(${state.history.length})` : "";
+  const items = [...state.history].reverse();
+  $("#history-list").innerHTML = items.length ? items.map(item => {
+    if (item.kind === "auction") {
+      const ar = artist(item.artist);
+      return `<article class="history-item auction-history" style="--artist:${ar.color}">
+        <span class="history-round">Round ${item.round}</span>
+        <strong>${item.seller} sold ${item.quantity > 1 ? `two ${ar.name} paintings` : ar.name}</strong>
+        <span>${TYPES[item.auctionType]?.icon || ""} ${TYPES[item.auctionType]?.name || item.auctionType} · ${item.buyer} paid ${money(item.price)}</span>
+      </article>`;
+    }
+    return `<article class="history-item round-history">
+      <span class="history-round">End of round ${item.round}</span>
+      <strong>${item.leaders.map((x,i) => `${i + 1}. ${artist(x.artist).name} (${money(x.value)})`).join(" · ")}</strong>
+      <span>${Object.entries(item.payouts).map(([name, value]) => `${name}: +${money(value)}`).join(" · ")}</span>
+    </article>`;
+  }).join("") : `<p class="empty">Auctions and round results will appear here.</p>`;
 }
 
 function renderGuide() {
@@ -624,6 +723,13 @@ function renderMarket() {
     <div class="market-label" title="Current value of each painting">💰 <span>Value</span></div>
     ${ARTISTS.map(a => cell(a, `<strong>${money(state.marketValues[a.id])}</strong>`)).join("")}
   </div>`;
+  requestAnimationFrame(() => {
+    const market = $("#market");
+    const active = market.querySelector(".market-artist.active");
+    if (active && market.scrollWidth > market.clientWidth) {
+      market.scrollLeft = active.offsetLeft - (market.clientWidth - active.offsetWidth) / 2;
+    }
+  });
 }
 
 function collectionHTML(p) {
@@ -634,27 +740,36 @@ function collectionHTML(p) {
 }
 
 function renderPlayers() {
-  $("#opponents").innerHTML = state.players.filter(p => !p.human).map(p => `
-    <article class="player ${current().id === p.id ? "current" : ""} ${state.auction?.seller === p.id ? "seller" : ""}">
+  const activeId = activePlayerId();
+  $("#opponents").innerHTML = state.players.map(p => `
+    <article class="player ${activeId === p.id ? "current" : ""} ${state.auction?.seller === p.id ? "seller" : ""}">
       <div class="player-profile">
-        <span class="avatar-wrap ${current().id === p.id ? "awake" : ""}"><img src="${p.avatar}" alt=""><i>😊</i></span>
+        ${p.avatar ? `<span class="avatar-wrap ${activeId === p.id ? "awake" : ""}"><img src="${p.avatar}" alt=""><i>😊</i></span>` : `<span class="you-avatar ${activeId === p.id ? "awake" : ""}">YOU</span>`}
         <div class="player-copy"><div class="player-head"><strong>${p.name}${state.auction?.seller === p.id ? '<span class="seller-badge">SELLING</span>' : ""}</strong><span class="cash">${money(p.cash)}</span></div>
         <small>${p.hand.length} in hand · ${p.collection.length} in this round</small></div>
       </div>
+      ${p.status ? `<div class="player-event">${p.status}</div>` : ""}
       <div class="collection">${collectionHTML(p)}</div>
     </article>`).join("");
 }
 
+function activePlayerId() {
+  const a = state.auction;
+  if (a && state.phase === "fixed" && !a.bid) return a.seller;
+  if (a && state.phase === "double") return a.matcher ?? a.seller;
+  if (a && ["open", "once", "fixed"].includes(state.phase) && a.cursor !== undefined) return a.cursor;
+  if (a?.card.type === "sealed" && a.secret?.[0] === undefined) return 0;
+  return state.turn;
+}
+
 function renderYou() {
   const you = state.players[0];
+  const yourTurn = activePlayerId() === 0;
   const canChoose = state.phase === "choose" && current().human;
   const canDouble = state.phase === "double" && (state.auction?.seller === 0 || state.auction?.matcher === 0);
+  $("#you").classList.toggle("current-hand", yourTurn);
   $("#you").innerHTML = `
-    <div class="your-summary">
-      <div><strong>Your collection this round</strong><small class="section-note">These paintings sell automatically when the round ends.</small><div class="collection your-collection">${collectionHTML(you)}</div></div>
-      <div class="cash">${money(you.cash)}</div>
-    </div>
-    <div class="hand-heading"><strong>Cards in your hand</strong><span>${you.hand.length} available to auction</span></div>
+    <div class="hand-heading"><div><strong>Your private hand ${yourTurn ? '<span class="your-turn-badge">YOUR TURN</span>' : ""}</strong><small class="section-note">Only you can see these cards.</small></div><span>${you.hand.length} available to auction</span></div>
     <div class="hand">${you.hand.map(c => {
       const enabled = canChoose || (canDouble && c.artist === state.auction.card.artist && c.type !== "double");
       return `<button class="hand-card" ${enabled ? "" : "disabled"} data-card="${c.id}" style="--artist:${artist(c.artist).color};--art:url('${artist(c.artist).image}')">
@@ -679,15 +794,18 @@ function renderStage() {
     const place = ranked.findIndex(x => x.id === ar.id) + 1;
     const bonus = [30, 20, 10, 0, 0][place - 1];
     const earlier = state.marketValues[ar.id];
+    const quantity = a.cards.length;
+    const eachValue = earlier + bonus;
     const placeName = ["1st", "2nd", "3rd", "4th", "5th"][place - 1];
     forecast = `<aside class="value-forecast" style="--artist:${ar.color}">
       <p class="eyebrow">If the round ended now</p>
-      <div class="forecast-now"><strong>${placeName}</strong><span>${money(earlier + bonus)} each</span></div>
-      <p>${money(earlier)} from earlier rounds + ${money(bonus)} this round</p>
+      <div class="forecast-now"><strong>${placeName}</strong><span>${money(eachValue)} each</span></div>
+      ${quantity > 1 ? `<div class="pair-total"><span>${money(eachValue)} × ${quantity} paintings</span><strong>${money(eachValue * quantity)} for the pair</strong></div>` : ""}
+      <p>${money(earlier)} from earlier rounds + ${money(bonus)} this round${quantity > 1 ? ", for each painting" : ""}</p>
       <div class="possible-values">
-        <span><b>1st</b>${money(earlier + 30)}</span>
-        <span><b>2nd</b>${money(earlier + 20)}</span>
-        <span><b>3rd</b>${money(earlier + 10)}</span>
+        <span><b>1st</b>${money((earlier + 30) * quantity)}${quantity > 1 ? "<small>pair</small>" : ""}</span>
+        <span><b>2nd</b>${money((earlier + 20) * quantity)}${quantity > 1 ? "<small>pair</small>" : ""}</span>
+        <span><b>3rd</b>${money((earlier + 10) * quantity)}${quantity > 1 ? "<small>pair</small>" : ""}</span>
       </div>
       <small>Only the top three artists pay.</small>
     </aside>`;
@@ -736,7 +854,10 @@ $("#continue-game").onclick = () => {
 };
 $("#help-button").onclick = () => $("#help-dialog").showModal();
 $(".dialog-close").onclick = () => $("#help-dialog").close();
+$("#history-button").onclick = () => $("#history-dialog").showModal();
+$(".history-close").onclick = () => $("#history-dialog").close();
 renderStaticGuide();
+document.querySelectorAll("[data-version]").forEach(el => el.textContent = `v${VERSION}`);
 if (localStorage.getItem("gallery-auction-save-v2")) $("#continue-game").classList.remove("hidden");
 function renderStaticGuide() {
   $("#help-types").innerHTML = Object.values(TYPES).map(t =>
