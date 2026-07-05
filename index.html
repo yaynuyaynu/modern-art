@@ -211,8 +211,8 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 .toast.round-result { border-color: #68a9dc; background: linear-gradient(145deg, rgba(35,32,27,.98), rgba(42,55,68,.98)); }
 .new-cards-dialog { width: min(920px, calc(100% - 28px)); text-align: center; }
 .new-cards-dialog > p:not(.eyebrow) { color: var(--muted); }
-.new-cards-list { display: flex; gap: 10px; overflow-x: auto; margin: 18px 0; padding: 8px 4px 14px; }
-.new-card { position: relative; isolation: isolate; flex: 0 0 116px; aspect-ratio: 2 / 3; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; padding: 10px; border: 5px solid white; color: white; text-align: left; text-shadow: 0 1px 4px rgba(0,0,0,.9); box-shadow: 0 6px 15px rgba(35,32,27,.18); }
+.new-cards-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 10px; width: min(620px, 100%); margin: 18px auto; padding: 4px; }
+.new-card { position: relative; isolation: isolate; width: 100%; max-width: 116px; aspect-ratio: 2 / 3; display: flex; flex-direction: column; justify-content: space-between; justify-self: center; overflow: hidden; padding: 9px; border: 4px solid white; color: white; text-align: left; text-shadow: 0 1px 4px rgba(0,0,0,.9); box-shadow: 0 6px 15px rgba(35,32,27,.18); }
 .new-card::before { content: ""; position: absolute; inset: 0; z-index: -2; background: var(--art) center / cover; }
 .new-card::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(transparent 35%, rgba(0,0,0,.72)); }
 .new-card strong { font-size: .9rem; }
@@ -228,6 +228,13 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 .payout-row { display: grid; grid-template-columns: 1fr auto auto; gap: 16px; align-items: center; padding: 10px 14px; border-radius: 9px; background: #f3eee5; text-align: left; }
 .payout-row span { color: #23704d; font-weight: 900; }
 .payout-row b { min-width: 90px; text-align: right; }
+@media (max-width: 560px) {
+  .new-cards-list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+  .new-card { padding: 6px; border-width: 3px; }
+}
+@media (max-width: 350px) {
+  .new-cards-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 
 @media (max-width: 850px) {
   .setup-shell { height: auto; min-height: 100dvh; overflow: auto; }
@@ -375,7 +382,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.8.1";
+const VERSION = "0.8.2";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
