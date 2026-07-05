@@ -200,6 +200,14 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 .toast.result { z-index: 100; top: 50%; bottom: auto; width: min(560px, calc(100% - 32px)); padding: 28px 34px; border: 5px solid #dca652; border-radius: 18px; background: rgba(35,32,27,.97); box-shadow: 0 24px 80px rgba(0,0,0,.38); transform: translate(-50%, -46%) scale(.96); text-align: center; font: 800 clamp(1.25rem, 3vw, 2rem)/1.25 Georgia, serif; }
 .toast.result.show { transform: translate(-50%, -50%) scale(1); }
 .toast.round-result { border-color: #68a9dc; background: linear-gradient(145deg, rgba(35,32,27,.98), rgba(42,55,68,.98)); }
+.new-cards-dialog { width: min(920px, calc(100% - 28px)); text-align: center; }
+.new-cards-dialog > p:not(.eyebrow) { color: var(--muted); }
+.new-cards-list { display: flex; gap: 10px; overflow-x: auto; margin: 18px 0; padding: 8px 4px 14px; }
+.new-card { position: relative; isolation: isolate; flex: 0 0 116px; aspect-ratio: 2 / 3; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; padding: 10px; border: 5px solid white; color: white; text-align: left; text-shadow: 0 1px 4px rgba(0,0,0,.9); box-shadow: 0 6px 15px rgba(35,32,27,.18); }
+.new-card::before { content: ""; position: absolute; inset: 0; z-index: -2; background: var(--art) center / cover; }
+.new-card::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(transparent 35%, rgba(0,0,0,.72)); }
+.new-card strong { font-size: .9rem; }
+.new-card span { font-size: .72rem; font-weight: 800; }
 
 @media (max-width: 850px) {
   .setup-shell { height: auto; min-height: 100dvh; overflow: auto; }
@@ -328,9 +336,17 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
     <div id="history-list" class="history-list"></div>
   </dialog>
 
+  <dialog id="new-cards-dialog" class="new-cards-dialog">
+    <p class="eyebrow">New cards added</p>
+    <h2>Your fresh paintings</h2>
+    <p>These were just added to your private hand.</p>
+    <div id="new-cards-list" class="new-cards-list"></div>
+    <button id="new-cards-close" class="primary big">Got it</button>
+  </dialog>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.7.3";
+const VERSION = "0.7.4";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -366,6 +382,7 @@ let peer = null;
 let hostConnection = null;
 let guestConnections = [];
 let roomId = "";
+let seenDealId = "";
 const $ = (s) => document.querySelector(s);
 const money = (n) => `${Math.max(0, Math.round(n))}`;
 const shuffle = (a) => {
@@ -422,9 +439,16 @@ function roundDealCount() {
 }
 
 function deal(count) {
+  const cardsByPlayer = {};
   state.players.forEach(p => {
-    for (let i = 0; i < count && state.deck.length; i++) p.hand.push(state.deck.pop());
+    cardsByPlayer[p.id] = [];
+    for (let i = 0; i < count && state.deck.length; i++) {
+      const card = state.deck.pop();
+      p.hand.push(card);
+      cardsByPlayer[p.id].push(card);
+    }
   });
+  state.lastDeal = { id: `${state.round}-${Date.now()}-${Math.random()}`, cardsByPlayer };
 }
 
 function artist(id) { return ARTISTS.find(a => a.id === id); }
@@ -742,6 +766,7 @@ function endRound(triggerCard) {
 }
 
 function aiChoose() {
+  if ($("#new-cards-dialog")?.open) return setTimeout(aiChoose, 500);
   const p = current();
   if (!p.hand.length) return nextTurn();
   const playable = p.hand.filter(c => c.type !== "double" || p.hand.some(x => x.artist === c.artist && x.id !== c.id));
@@ -764,7 +789,23 @@ function render() {
   renderStage();
   renderYou();
   renderHistory();
+  renderNewCards();
   if (networkMode === "host") broadcastState();
+}
+
+function renderNewCards() {
+  const deal = state.lastDeal;
+  const cards = deal?.cardsByPlayer?.[localPlayerId] || [];
+  if (!deal || !cards.length || seenDealId === deal.id) return;
+  const dialog = $("#new-cards-dialog");
+  $("#new-cards-list").innerHTML = cards.map(c => {
+    const ar = artist(c.artist);
+    return `<div class="new-card" style="--artist:${ar.color};--art:url('${ar.image}')">
+      <strong>${ar.name}</strong>
+      <span>${TYPES[c.type].icon} ${TYPES[c.type].name}</span>
+    </div>`;
+  }).join("");
+  if (!dialog.open) dialog.showModal();
 }
 
 function renderHistory() {
@@ -1107,6 +1148,10 @@ $("#help-button").onclick = () => $("#help-dialog").showModal();
 $(".dialog-close").onclick = () => $("#help-dialog").close();
 $("#history-button").onclick = () => $("#history-dialog").showModal();
 $(".history-close").onclick = () => $("#history-dialog").close();
+$("#new-cards-close").onclick = () => {
+  seenDealId = state?.lastDeal?.id || seenDealId;
+  $("#new-cards-dialog").close();
+};
 renderStaticGuide();
 document.querySelectorAll("[data-version]").forEach(el => el.textContent = `v${VERSION}`);
 if (localStorage.getItem("gallery-auction-save-v2")) $("#continue-game").classList.remove("hidden");
