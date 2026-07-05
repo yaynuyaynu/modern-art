@@ -194,6 +194,8 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 .round-history { --artist: var(--gold); }
 .toast { position: fixed; z-index: 10; left: 50%; bottom: 18px; transform: translate(-50%, 20px); padding: 10px 16px; border-radius: 99px; background: var(--ink); color: white; opacity: 0; pointer-events: none; transition: .2s; }
 .toast.show { transform: translate(-50%, 0); opacity: 1; }
+.toast.result { z-index: 100; top: 50%; bottom: auto; width: min(560px, calc(100% - 32px)); padding: 28px 34px; border: 5px solid #dca652; border-radius: 18px; background: rgba(35,32,27,.97); box-shadow: 0 24px 80px rgba(0,0,0,.38); transform: translate(-50%, -46%) scale(.96); text-align: center; font: 800 clamp(1.25rem, 3vw, 2rem)/1.25 Georgia, serif; }
+.toast.result.show { transform: translate(-50%, -50%) scale(1); }
 
 @media (max-width: 850px) {
   .setup-shell { height: auto; min-height: 100dvh; overflow: auto; }
@@ -322,7 +324,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.6.0";
+const VERSION = "0.6.1";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -663,7 +665,7 @@ function resolveAuction() {
   if (a.bidder === null) {
     seller.collection.push(...a.cards);
     seller.status = `Kept ${artist(a.card.artist).name} for free`;
-    toast(`No buyer. ${seller.name} keeps the painting${a.cards.length > 1 ? "s" : ""}.`);
+    auctionResult(`No sale — ${seller.name} keeps ${a.cards.length > 1 ? `both ${artist(a.card.artist).name} paintings` : `the ${artist(a.card.artist).name}`}.`);
     state.history.push({ kind: "auction", round: state.round, artist: a.card.artist, auctionType: a.originalType, seller: seller.name, buyer: seller.name, price: 0, quantity: a.cards.length });
   } else {
     const buyer = state.players[a.bidder];
@@ -678,7 +680,7 @@ function resolveAuction() {
     buyer.collection.push(...a.cards);
     buyer.status = `Bought ${a.cards.length > 1 ? "the pair" : artist(a.card.artist).name} for ${money(a.bid)}`;
     if (buyer.id !== seller.id) seller.status = `Sold for ${money(a.bid)}`;
-    toast(`${isLocalPlayer(buyer) ? "You buy" : `${buyer.name} buys`} ${a.cards.length > 1 ? "the pair" : "it"} for ${money(a.bid)}.`);
+    auctionResult(`${isLocalPlayer(buyer) ? "You win" : `${buyer.name} wins`} ${a.cards.length > 1 ? `two ${artist(a.card.artist).name} paintings` : artist(a.card.artist).name} for ${money(a.bid)}!`);
     state.history.push({ kind: "auction", round: state.round, artist: a.card.artist, auctionType: a.originalType, seller: seller.name, buyer: buyer.name, price: a.bid, quantity: a.cards.length });
   }
   if (a.matchingSeller !== undefined) state.turn = a.matchingSeller;
@@ -924,8 +926,16 @@ function stageTitle() {
   return TYPES[state.auction.card.type]?.name || "Auction in progress";
 }
 function toast(text) {
-  const el = $("#toast"); el.textContent = text; el.classList.add("show");
-  clearTimeout(toast.timer); toast.timer = setTimeout(() => el.classList.remove("show"), 3800);
+  const el = $("#toast"); el.textContent = text; el.classList.remove("result"); el.classList.add("show");
+  clearTimeout(toast.timer); toast.timer = setTimeout(() => el.classList.remove("show"), 3000);
+}
+function showAuctionResult(text) {
+  const el = $("#toast"); el.textContent = text; el.classList.add("result", "show");
+  clearTimeout(toast.timer); toast.timer = setTimeout(() => el.classList.remove("show", "result"), 3000);
+}
+function auctionResult(text) {
+  showAuctionResult(text);
+  if (networkMode === "host") guestConnections.filter(c => c.open).forEach(c => c.send({ type: "notice", text }));
 }
 
 function roomCodeFromId(id) {
@@ -1001,6 +1011,7 @@ function joinRoom() {
 }
 function handleGuestMessage(message) {
   if (message?.type === "error") return setRoomStatus(message.message);
+  if (message?.type === "notice") return showAuctionResult(message.text);
   if (message?.type !== "state") return;
   state = message.state;
   localPlayerId = message.seat;
