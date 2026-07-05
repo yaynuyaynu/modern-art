@@ -150,6 +150,11 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 .room-status { min-height: 22px; margin-top: 9px; font-size: .82rem; color: var(--muted); overflow-wrap: anywhere; }
 .room-status a { color: #23704d; font-weight: 800; }
 .online-pill { display: inline-block; margin-left: 8px; padding: 3px 7px; border-radius: 999px; color: #23704d; background: #e2f3e8; font: 800 .65rem/1 sans-serif; vertical-align: middle; }
+.darkstaff-mark, .game-footer { color: #7b7062; font: 600 .72rem/1.2 sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+.darkstaff-mark { margin-top: 15px; text-align: center; }
+.game-footer { padding: 0 0 22px; text-align: center; }
+.darkstaff-mark span, .game-footer span { color: #b8792f; margin-right: 5px; }
+.darkstaff-mark strong, .game-footer strong { color: var(--ink); letter-spacing: .12em; }
 .market-artist { position: relative; isolation: isolate; min-height: 58px; overflow: hidden; display: grid; place-items: end center; padding: 8px !important; }
 .market-artist .market-art { position: absolute; inset: 0; z-index: -2; background: var(--art) center 42% / cover; opacity: .48; filter: saturate(.7); }
 .market-artist::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(to bottom, rgba(255,255,255,.2), rgba(255,253,248,.94)); }
@@ -283,6 +288,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
         <div id="room-status" class="room-status"></div>
       </div>
       <button id="continue-game" class="quiet big hidden">Continue saved game</button>
+      <div class="darkstaff-mark"><span>◆</span> Software by <strong>Darkstaff</strong></div>
     </section>
   </div>
 
@@ -306,6 +312,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
       <div id="opponents" class="opponents"></div>
       <div id="you" class="player-area"></div>
     </section>
+    <footer class="game-footer"><span>◆</span> Software by <strong>Darkstaff</strong></footer>
   </main>
 
   <dialog id="help-dialog">
@@ -324,7 +331,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.6.1";
+const VERSION = "0.6.2";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
