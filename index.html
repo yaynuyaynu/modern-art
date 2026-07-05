@@ -199,6 +199,8 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 .toast.show { transform: translate(-50%, 0); opacity: 1; }
 .toast.result { z-index: 100; top: 50%; bottom: auto; width: min(560px, calc(100% - 32px)); padding: 28px 34px; border: 5px solid #dca652; border-radius: 18px; background: rgba(35,32,27,.97); box-shadow: 0 24px 80px rgba(0,0,0,.38); transform: translate(-50%, -46%) scale(.96); text-align: center; font: 800 clamp(1.25rem, 3vw, 2rem)/1.25 Georgia, serif; }
 .toast.result.show { transform: translate(-50%, -50%) scale(1); }
+.toast.result.player-result { bottom: auto; width: min(360px, calc(100% - 24px)); padding: 20px 24px; border-width: 4px; font-size: clamp(1rem, 2vw, 1.35rem); }
+.toast.result.player-result::after { content: ""; position: absolute; left: 50%; bottom: -14px; width: 24px; height: 24px; background: rgba(35,32,27,.97); border-right: 4px solid #dca652; border-bottom: 4px solid #dca652; transform: translateX(-50%) rotate(45deg); }
 .toast.round-result { border-color: #68a9dc; background: linear-gradient(145deg, rgba(35,32,27,.98), rgba(42,55,68,.98)); }
 .new-cards-dialog { width: min(920px, calc(100% - 28px)); text-align: center; }
 .new-cards-dialog > p:not(.eyebrow) { color: var(--muted); }
@@ -346,7 +348,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.7.4";
+const VERSION = "0.7.5";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -705,7 +707,7 @@ function resolveAuction() {
   if (a.bidder === null) {
     seller.collection.push(...a.cards);
     seller.status = `Kept ${artist(a.card.artist).name} for free`;
-    auctionResult(`No sale — ${seller.name} keeps ${a.cards.length > 1 ? `both ${artist(a.card.artist).name} paintings` : `the ${artist(a.card.artist).name}`}.`);
+    auctionResult(`No sale — ${seller.name} keeps ${a.cards.length > 1 ? `both ${artist(a.card.artist).name} paintings` : `the ${artist(a.card.artist).name}`}.`, seller.id);
     state.history.push({ kind: "auction", round: state.round, artist: a.card.artist, auctionType: a.originalType, seller: seller.name, buyer: seller.name, price: 0, quantity: a.cards.length });
   } else {
     const buyer = state.players[a.bidder];
@@ -720,7 +722,7 @@ function resolveAuction() {
     buyer.collection.push(...a.cards);
     buyer.status = `Bought ${a.cards.length > 1 ? "the pair" : artist(a.card.artist).name} for ${money(a.bid)}`;
     if (buyer.id !== seller.id) seller.status = `Sold for ${money(a.bid)}`;
-    auctionResult(`${isLocalPlayer(buyer) ? "You win" : `${buyer.name} wins`} ${a.cards.length > 1 ? `two ${artist(a.card.artist).name} paintings` : artist(a.card.artist).name} for ${money(a.bid)}!`);
+    auctionResult(`${isLocalPlayer(buyer) ? "You win" : `${buyer.name} wins`} ${a.cards.length > 1 ? `two ${artist(a.card.artist).name} paintings` : artist(a.card.artist).name} for ${money(a.bid)}!`, buyer.id);
     state.history.push({ kind: "auction", round: state.round, artist: a.card.artist, auctionType: a.originalType, seller: seller.name, buyer: buyer.name, price: a.bid, quantity: a.cards.length });
   }
   if (a.matchingSeller !== undefined) state.turn = a.matchingSeller;
@@ -876,7 +878,7 @@ function renderPlayers() {
   $("#opponents").innerHTML = state.players.map(p => {
     const avatar = playerAvatar(p, activeId);
     return `
-    <article class="player ${activeId === p.id ? "current" : ""} ${state.auction?.seller === p.id ? "seller" : ""}">
+    <article class="player ${activeId === p.id ? "current" : ""} ${state.auction?.seller === p.id ? "seller" : ""}" data-player-id="${p.id}">
       <div class="player-profile">
         ${avatar ? `<span class="avatar-wrap ${activeId === p.id ? "awake" : ""}"><img src="${avatar}" alt="${p.name} is ${playerMood(p, activeId)}"></span>` : `<span class="you-avatar ${activeId === p.id ? "awake" : ""}">${isLocalPlayer(p) ? "YOU" : p.name.slice(0,2).toUpperCase()}</span>`}
         <div class="player-copy"><div class="player-head"><strong>${p.name}${p.online ? '<span class="online-pill">ONLINE</span>' : ""}${state.auction?.seller === p.id ? '<span class="seller-badge">SELLING</span>' : ""}</strong><span class="cash">${money(p.cash)}</span></div>
@@ -1004,21 +1006,47 @@ function stageTitle() {
   return TYPES[state.auction.card.type]?.name || "Auction in progress";
 }
 function toast(text) {
-  const el = $("#toast"); el.textContent = text; el.classList.remove("result"); el.classList.add("show");
+  const el = $("#toast");
+  el.textContent = text;
+  el.classList.remove("result", "player-result", "round-result");
+  el.style.left = "";
+  el.style.top = "";
+  el.classList.add("show");
   clearTimeout(toast.timer); toast.timer = setTimeout(() => el.classList.remove("show"), 3000);
 }
-function showAuctionResult(text) {
-  const el = $("#toast"); el.textContent = text; el.classList.add("result", "show");
-  clearTimeout(toast.timer); toast.timer = setTimeout(() => el.classList.remove("show", "result"), 3000);
+function showAuctionResult(text, playerId) {
+  const el = $("#toast");
+  const target = document.querySelector(`[data-player-id="${playerId}"]`);
+  el.textContent = text;
+  el.classList.add("result", "show");
+  if (target) {
+    const rect = target.getBoundingClientRect();
+    const x = Math.max(170, Math.min(innerWidth - 170, rect.left + rect.width / 2));
+    const y = Math.max(110, Math.min(innerHeight - 110, rect.top + rect.height / 2));
+    el.style.left = `${x}px`;
+    el.style.top = `${y}px`;
+    el.classList.add("player-result");
+  }
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => {
+    el.classList.remove("show", "result", "player-result");
+    el.style.left = "";
+    el.style.top = "";
+  }, 3000);
 }
 function roundResult(text) {
-  const el = $("#toast"); el.textContent = text; el.classList.add("result", "round-result", "show");
+  const el = $("#toast");
+  el.textContent = text;
+  el.classList.remove("player-result");
+  el.style.left = "";
+  el.style.top = "";
+  el.classList.add("result", "round-result", "show");
   clearTimeout(toast.timer); toast.timer = setTimeout(() => el.classList.remove("show", "result", "round-result"), 5000);
   if (networkMode === "host") guestConnections.filter(c => c.open).forEach(c => c.send({ type: "notice", text, duration: 5000 }));
 }
-function auctionResult(text) {
-  showAuctionResult(text);
-  if (networkMode === "host") guestConnections.filter(c => c.open).forEach(c => c.send({ type: "notice", text }));
+function auctionResult(text, playerId) {
+  showAuctionResult(text, playerId);
+  if (networkMode === "host") guestConnections.filter(c => c.open).forEach(c => c.send({ type: "notice", text, playerId }));
 }
 
 function roomCodeFromId(id) {
@@ -1096,7 +1124,7 @@ function handleGuestMessage(message) {
   if (message?.type === "error") return setRoomStatus(message.message);
   if (message?.type === "notice") {
     if (message.duration === 5000) return roundResult(message.text);
-    return showAuctionResult(message.text);
+    return showAuctionResult(message.text, message.playerId);
   }
   if (message?.type !== "state") return;
   state = message.state;
