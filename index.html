@@ -100,7 +100,8 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 @keyframes sad-sink { to { transform: translateY(4px) scale(.94); } }
 .you-avatar { display: grid; place-items: center; flex: 0 0 44px; width: 44px; height: 44px; border-radius: 50%; background: var(--ink); color: white; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,.15); font-size: .58rem; font-weight: 900; }
 .you-avatar.awake { box-shadow: 0 0 0 3px #e3af5d, 0 5px 12px rgba(0,0,0,.15); transform: translateY(-2px); }
-.player-event { margin-top: 9px; padding: 6px 9px; border-radius: 7px; background: #f1eadc; color: #5a4a32; font-size: .72rem; font-weight: 900; }
+.player-event { margin-top: 9px; padding: 6px 9px; border-radius: 7px; background: #f1eadc; color: #5a4a32; font-size: .72rem; font-weight: 900; animation: action-pop .28s ease-out both; }
+@keyframes action-pop { from { opacity: 0; transform: scale(.88); } }
 .player-head { display: flex; justify-content: space-between; gap: 8px; }
 .player-head strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .seller-badge { display: inline-block; margin-left: 8px; padding: 2px 7px; border-radius: 99px; background: var(--gold); color: white; font-size: .58rem; letter-spacing: .08em; vertical-align: 2px; }
@@ -205,8 +206,8 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 .toast.show { transform: translate(-50%, 0); opacity: 1; }
 .toast.result { z-index: 100; top: 50%; bottom: auto; width: min(560px, calc(100% - 32px)); padding: 28px 34px; border: 5px solid #dca652; border-radius: 18px; background: rgba(35,32,27,.97); box-shadow: 0 24px 80px rgba(0,0,0,.38); transform: translate(-50%, -46%) scale(.96); text-align: center; font: 800 clamp(1.25rem, 3vw, 2rem)/1.25 Georgia, serif; }
 .toast.result.show { transform: translate(-50%, -50%) scale(1); }
-.toast.result.player-result { bottom: auto; width: min(360px, calc(100% - 24px)); padding: 20px 24px; border-width: 4px; font-size: clamp(1rem, 2vw, 1.35rem); }
-.toast.result.player-result::after { content: ""; position: absolute; left: 50%; bottom: -14px; width: 24px; height: 24px; background: rgba(35,32,27,.97); border-right: 4px solid #dca652; border-bottom: 4px solid #dca652; transform: translateX(-50%) rotate(45deg); }
+.toast.result.player-result { bottom: auto; width: min(350px, calc(100% - 24px)); padding: 18px 22px; border: 0; border-left: 7px solid #dca652; border-radius: 8px; background: rgba(35,32,27,.98); box-shadow: 0 12px 35px rgba(0,0,0,.34); transform: translate(-50%, -50%) scale(.72); transform-origin: center; font: 900 clamp(1rem, 2vw, 1.3rem)/1.2 sans-serif; letter-spacing: -.01em; text-transform: none; }
+.toast.result.player-result.show { transform: translate(-50%, -50%) scale(1); }
 .toast.round-result { border-color: #68a9dc; background: linear-gradient(145deg, rgba(35,32,27,.98), rgba(42,55,68,.98)); }
 .new-cards-dialog { width: min(920px, calc(100% - 28px)); text-align: center; }
 .new-cards-dialog > p:not(.eyebrow) { color: var(--muted); }
@@ -374,7 +375,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.8.0";
+const VERSION = "0.8.1";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -505,7 +506,7 @@ function launchCard(player, cardId) {
   const index = player.hand.findIndex(c => c.id === cardId);
   if (index < 0) return;
   const card = player.hand.splice(index, 1)[0];
-  state.players.forEach(p => p.status = "");
+  state.players.forEach(p => { p.status = ""; p.reaction = ""; });
   player.status = `Selling ${artist(card.artist).name} · ${TYPES[card.type].name}`;
   state.auction = { card, originalType: card.type, seller: player.id, cards: [card], bid: 0, bidder: null, acted: [], cursor: (player.id + 1) % state.players.length };
   state.tableCounts[card.artist]++;
@@ -737,8 +738,12 @@ function resolveAuction() {
     state.history.push({ kind: "auction", round: state.round, artist: a.card.artist, auctionType: a.originalType, seller: seller.name, buyer: seller.name, price: 0, quantity: a.cards.length });
   } else {
     const buyer = state.players[a.bidder];
+    const grumbles = ["Too rich for me.", "I never liked it anyway.", "Next time, perhaps.", "That was my limit.", "A questionable masterpiece."];
     state.players.forEach(p => {
-      if (p.id !== buyer.id && p.id !== a.seller) p.status = "Missed out";
+      if (p.id !== buyer.id && p.id !== a.seller) {
+        p.status = `“${grumbles[Math.floor(Math.random() * grumbles.length)]}”`;
+        p.reaction = "grumble";
+      }
     });
     buyer.cash -= a.bid;
     if (buyer.id !== seller.id) {
@@ -946,7 +951,7 @@ function renderPlayers() {
 
 function playerMood(p, activeId = activePlayerId()) {
   if (p.status?.startsWith("Bought") || p.status?.startsWith("Kept")) return "winning";
-  if (p.status?.startsWith("Passed") || p.status === "Missed out") return "passing";
+  if (p.status?.startsWith("Passed") || p.reaction === "grumble") return "passing";
   if (p.status?.startsWith("Bid") || p.status?.includes("Accepted")) return "bidding";
   if (state.auction?.seller === p.id) return "selling";
   if (activeId === p.id) return "thinking";
@@ -1070,17 +1075,20 @@ function toast(text) {
 }
 function showAuctionResult(text, playerId) {
   const el = $("#toast");
-  const target = document.querySelector(`[data-player-id="${playerId}"]`);
+  const target = document.querySelector(`[data-player-id="${playerId}"] .player-profile`) ||
+    document.querySelector(`[data-player-id="${playerId}"]`);
+  el.classList.remove("show", "round-result");
   el.textContent = text;
-  el.classList.add("result", "show");
+  el.classList.add("result", "player-result");
   if (target) {
     const rect = target.getBoundingClientRect();
     const x = Math.max(170, Math.min(innerWidth - 170, rect.left + rect.width / 2));
-    const y = Math.max(110, Math.min(innerHeight - 110, rect.top + rect.height / 2));
+    const y = Math.max(90, Math.min(innerHeight - 90, rect.top + rect.height / 2));
     el.style.left = `${x}px`;
     el.style.top = `${y}px`;
-    el.classList.add("player-result");
   }
+  void el.offsetWidth;
+  requestAnimationFrame(() => el.classList.add("show"));
   clearTimeout(toast.timer);
   toast.timer = setTimeout(() => {
     el.classList.remove("show", "result", "player-result");
