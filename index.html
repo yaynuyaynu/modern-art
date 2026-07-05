@@ -84,7 +84,9 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 .opponents { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; align-items: start; }
 .player, .player-area, .stage { border: 1px solid var(--line); background: rgba(255,253,248,.92); box-shadow: 0 5px 18px rgba(45,38,28,.07); border-radius: 14px; }
 .player-area.current-hand { outline: 3px solid #dca652; background: #fffaf0; box-shadow: 0 8px 24px rgba(182,121,50,.16); }
-.player { padding: 10px 12px; }
+.player { position: relative; padding: 10px 12px; }
+.player-win-pop { position: absolute; z-index: 5; inset: 7px; display: grid; place-items: center; padding: 12px; border: 3px solid #dca652; border-radius: 10px; background: rgba(29,85,57,.96); color: white; box-shadow: 0 8px 24px rgba(0,0,0,.24); text-align: center; font: 900 1rem/1.25 sans-serif; animation: win-in .3s ease-out both; }
+@keyframes win-in { from { opacity: 0; transform: scale(.78); } }
 .player.current { outline: 3px solid #dca652; }
 .player.seller { background: #fff9e9; }
 .player-profile { display: flex; gap: 10px; align-items: center; }
@@ -382,7 +384,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.8.2";
+const VERSION = "0.8.3";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -945,6 +947,7 @@ function renderPlayers() {
     const avatar = playerAvatar(p, activeId);
     return `
     <article class="player ${activeId === p.id ? "current" : ""} ${state.auction?.seller === p.id ? "seller" : ""}" data-player-id="${p.id}">
+      ${state.playerNotices?.[p.id] ? `<div class="player-win-pop">${state.playerNotices[p.id]}</div>` : ""}
       <div class="player-profile">
         ${avatar ? `<span class="avatar-wrap mood-${playerMood(p, activeId)} ${activeId === p.id ? "awake" : ""}"><img src="${avatar}" alt="${p.name} is ${playerMood(p, activeId)}"></span>` : `<span class="you-avatar ${activeId === p.id ? "awake" : ""}">${isLocalPlayer(p) ? "YOU" : p.name.slice(0,2).toUpperCase()}</span>`}
         <div class="player-copy"><div class="player-head"><strong>${p.name}${p.online ? '<span class="online-pill">ONLINE</span>' : ""}${state.auction?.seller === p.id ? '<span class="seller-badge">SELLING</span>' : ""}</strong><span class="cash">${money(p.cash)}</span></div>
@@ -1114,8 +1117,16 @@ function roundResult(text) {
   if (networkMode === "host") guestConnections.filter(c => c.open).forEach(c => c.send({ type: "notice", text, duration: 5000 }));
 }
 function auctionResult(text, playerId) {
-  showAuctionResult(text, playerId);
-  if (networkMode === "host") guestConnections.filter(c => c.open).forEach(c => c.send({ type: "notice", text, playerId }));
+  state.playerNotices ||= {};
+  state.playerNotices[playerId] = text;
+  render();
+  clearTimeout(auctionResult.timers?.[playerId]);
+  auctionResult.timers ||= {};
+  auctionResult.timers[playerId] = setTimeout(() => {
+    if (!state?.playerNotices) return;
+    delete state.playerNotices[playerId];
+    render();
+  }, 10000);
 }
 
 function roomCodeFromId(id) {
