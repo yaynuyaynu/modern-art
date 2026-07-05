@@ -80,8 +80,8 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 .artist-stats strong { color: white; }
 .artist-count { display: flex; gap: 3px; margin-top: 8px; min-height: 7px; }
 .artist-count i { width: 14px; height: 6px; border-radius: 3px; background: var(--artist); }
-.table { display: grid; grid-template-rows: auto minmax(280px, auto) auto; gap: 12px; padding: 16px 0 50px; }
-.opponents { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+.table { display: grid; grid-template-rows: auto auto auto; gap: 12px; padding: 16px 0 50px; }
+.opponents { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; align-items: start; }
 .player, .player-area, .stage { border: 1px solid var(--line); background: rgba(255,253,248,.92); box-shadow: 0 5px 18px rgba(45,38,28,.07); border-radius: 14px; }
 .player-area.current-hand { outline: 3px solid #dca652; background: #fffaf0; box-shadow: 0 8px 24px rgba(182,121,50,.16); }
 .player { padding: 10px 12px; }
@@ -104,10 +104,16 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 .collection { display: flex; flex-wrap: wrap; gap: 4px; min-height: 22px; margin-top: 7px; }
 .mini-art { position: relative; width: 54px; height: 68px; border: 3px solid white; border-radius: 3px; background: linear-gradient(to bottom, transparent 45%, rgba(0,0,0,.78)), var(--art) center/cover; box-shadow: 0 2px 7px #aaa; }
 .mini-art b { position: absolute; left: 4px; right: 4px; bottom: 4px; color: white; font-size: .58rem; line-height: 1; text-shadow: 0 1px 2px black; }
-.stage { display: grid; place-items: center; padding: 18px; min-height: 300px; text-align: center; overflow: hidden; }
-.stage-inner { width: min(900px, 100%); }
-.stage-layout { display: grid; grid-template-columns: minmax(320px, 1.15fr) minmax(235px, .85fr); gap: clamp(24px, 6vw, 70px); align-items: center; }
-.auction-focus { min-width: 0; }
+.stage { display: grid; place-items: center; padding: 14px 18px; min-height: 0; text-align: center; overflow: hidden; }
+.stage-inner { width: min(1080px, 100%); }
+.stage-layout { display: grid; grid-template-columns: minmax(500px, 1fr) minmax(250px, 330px); gap: clamp(20px, 4vw, 48px); align-items: center; }
+.auction-focus { min-width: 0; display: grid; grid-template-columns: 200px minmax(260px, 1fr); grid-template-rows: auto auto auto auto; column-gap: 26px; align-items: center; }
+.auction-source { grid-column: 1; justify-self: center; margin-bottom: 6px; }
+.auction-lot { grid-column: 1; grid-row: 2 / span 3; }
+.auction-focus > h2, .auction-focus > .instruction, .auction-focus > .bid-row, .auction-focus > .actions, .auction-focus > .auction-copy { grid-column: 2; }
+.auction-focus > h2 { align-self: end; margin-top: 0; }
+.auction-focus > .instruction { margin: 4px 0 10px; }
+.auction-focus > .bid-row, .auction-focus > .actions { justify-self: center; }
 .artist-context { padding: 20px; border: 1px solid var(--line); border-top: 5px solid var(--artist); border-radius: 12px; background: #fff; text-align: left; box-shadow: 0 8px 24px rgba(45,38,28,.08); }
 .artist-context h3 { margin: 3px 0 17px; font: 700 1.5rem/1.1 Georgia, serif; }
 .context-stat { display: grid; margin-bottom: 8px; }
@@ -133,6 +139,25 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 .pair-total { display: grid; gap: 3px; margin: 12px 0; padding: 11px; border-radius: 8px; background: color-mix(in srgb, var(--artist) 16%, white); }
 .pair-total span { color: var(--muted); font-size: .78rem; }
 .pair-total strong { font-size: 1.08rem; }
+.auction-lot { display: flex; justify-content: center; align-items: center; min-height: 220px; }
+.auction-lot.is-pair { padding-right: 42px; }
+.auction-lot.is-pair .auction-card { box-shadow: 0 10px 24px rgba(45,38,28,.18); }
+.auction-lot.is-pair .auction-card + .auction-card { margin-left: -58px; transform: translate(42px, 12px) rotate(4deg); }
+.multiplayer-box { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+.multiplayer-box p { margin: 4px 0 10px; color: var(--muted); font-size: .88rem; }
+.multiplayer-actions { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; }
+.multiplayer-actions input { min-width: 0; border: 1px solid var(--line); border-radius: 999px; padding: 0 14px; font: inherit; text-transform: uppercase; }
+.room-status { min-height: 22px; margin-top: 9px; font-size: .82rem; color: var(--muted); overflow-wrap: anywhere; }
+.room-status a { color: #23704d; font-weight: 800; }
+.online-pill { display: inline-block; margin-left: 8px; padding: 3px 7px; border-radius: 999px; color: #23704d; background: #e2f3e8; font: 800 .65rem/1 sans-serif; vertical-align: middle; }
+.market-artist { position: relative; isolation: isolate; min-height: 58px; overflow: hidden; display: grid; place-items: end center; padding: 8px !important; }
+.market-artist .market-art { position: absolute; inset: 0; z-index: -2; background: var(--art) center 42% / cover; opacity: .48; filter: saturate(.7); }
+.market-artist::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(to bottom, rgba(255,255,255,.2), rgba(255,253,248,.94)); }
+.market-artist strong { padding: 2px 7px; border-radius: 999px; background: rgba(255,255,255,.72); backdrop-filter: blur(3px); }
+@media (max-width: 620px) {
+  .multiplayer-actions { grid-template-columns: 1fr 1fr; }
+  .multiplayer-actions input { grid-column: 1 / -1; grid-row: 1; min-height: 42px; }
+}
 .value-forecast > p:not(.eyebrow) { color: var(--muted); font-size: .78rem; }
 .possible-values { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 16px 0 9px; }
 .possible-values span { display: grid; gap: 2px; padding: 8px 4px; border-radius: 7px; background: #f3eee6; text-align: center; font-weight: 900; }
@@ -217,6 +242,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 }
 
 </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.5/peerjs.min.js" integrity="sha512-XEKeWX+mI3Ov+tg2evDlVQFzVOIp4T8J3cNcCEPaEUGpxJV3eZaN8rHuvnFPvQpGJBHPmrozJDMpm2xcDvtmyQ==" crossorigin="anonymous"></script>
 </head>
 <body>
   <div id="setup" class="setup-shell">
@@ -244,6 +270,16 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
       </div>
       <p class="setup-note">The first auctioneer is chosen randomly.</p>
       <button id="start-game" class="primary big">Enter the gallery</button>
+      <div class="multiplayer-box">
+        <strong>Play with someone online</strong>
+        <p>One person creates a room and sends the link to the other.</p>
+        <div class="multiplayer-actions">
+          <button id="host-game" class="quiet">Create a room</button>
+          <input id="room-code" aria-label="Room code" placeholder="Room code">
+          <button id="join-game" class="quiet">Join room</button>
+        </div>
+        <div id="room-status" class="room-status"></div>
+      </div>
       <button id="continue-game" class="quiet big hidden">Continue saved game</button>
     </section>
   </div>
@@ -286,7 +322,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.5.0";
+const VERSION = "0.6.0";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -310,6 +346,12 @@ const AI_PEOPLE = [
 ];
 
 let state = null;
+let networkMode = "solo";
+let localPlayerId = 0;
+let peer = null;
+let hostConnection = null;
+let guestConnections = [];
+let roomId = "";
 const $ = (s) => document.querySelector(s);
 const money = (n) => `${Math.max(0, Math.round(n))}`;
 const shuffle = (a) => {
@@ -330,7 +372,7 @@ function makeDeck() {
   ));
 }
 
-function startGame() {
+function startGame(options = {}) {
   const count = +$("#player-count").value;
   state = {
     round: 1, turn: Math.floor(Math.random() * count), phase: "choose", rule: $("#rule-set").value,
@@ -342,15 +384,21 @@ function startGame() {
     players: Array.from({ length: count }, (_, i) => ({
       id: i, name: i === 0 ? "You" : AI_PEOPLE[i - 1].name,
       avatar: i === 0 ? null : AI_PEOPLE[i - 1].avatar,
-      human: i === 0, cash: 100, hand: [], collection: [], passed: false, status: ""
+      human: i === 0 || (networkMode === "host" && i === 1), online: networkMode === "host" && i < 2,
+      cash: 100, hand: [], collection: [], passed: false, status: ""
     }))
   };
+  if (networkMode === "host") {
+    state.players[0].name = "Host";
+    state.players[1].name = options.guestName || "Guest";
+    state.players[1].avatar = null;
+  }
   deal(roundDealCount());
   state.message = `${current().name} was randomly chosen to start.`;
   $("#setup").classList.add("hidden");
   $("#game").classList.remove("hidden");
   render();
-  if (!current().human) setTimeout(aiChoose, 900);
+  if (isComputer(current())) setTimeout(aiChoose, 900);
 }
 
 function roundDealCount() {
@@ -367,6 +415,10 @@ function deal(count) {
 
 function artist(id) { return ARTISTS.find(a => a.id === id); }
 function current() { return state.players[state.turn]; }
+function localPlayer() { return state?.players?.[localPlayerId] || state?.players?.[0]; }
+function isLocalPlayer(p) { return !!p && p.id === localPlayerId; }
+function isComputer(p) { return !!p && !p.human; }
+function canLocalAct(p) { return !!p && p.human && isLocalPlayer(p); }
 function nextTurn() {
   state.turn = (state.turn + 1) % state.players.length;
   state.phase = "choose";
@@ -374,11 +426,12 @@ function nextTurn() {
   state.players.forEach(p => p.passed = false);
   state.message = `${current().name} chooses a painting to auction.`;
   render();
-  if (!current().human) setTimeout(aiChoose, 650);
+  if (isComputer(current()) && networkMode !== "guest") setTimeout(aiChoose, 650);
 }
 
 function playCard(cardId) {
-  if (state.phase !== "choose" || !current().human) return;
+  if (networkMode === "guest") return sendAction("play", { cardId });
+  if (state.phase !== "choose" || !canLocalAct(current())) return;
   launchCard(current(), cardId);
 }
 
@@ -416,7 +469,7 @@ function auctionTurn() {
     const p = state.players[a.cursor];
     state.message = `${p.name} has one chance to bid above ${money(a.bid)} or pass.`;
     render();
-    if (!p.human) setTimeout(() => aiBid(p), 500);
+    if (isComputer(p) && networkMode !== "guest") setTimeout(() => aiBid(p), 500);
     return;
   }
   const eligible = state.players.filter(p => !p.passed);
@@ -426,7 +479,7 @@ function auctionTurn() {
   state.phase = state.auction.card.type;
   state.message = `${p.name}: raise above ${money(a.bid)} or pass.`;
   render();
-  if (!p.human) setTimeout(() => aiBid(p), 500);
+  if (isComputer(p) && networkMode !== "guest") setTimeout(() => aiBid(p), 500);
 }
 
 function aiBid(p) {
@@ -462,7 +515,7 @@ function passBid(p) {
 
 function sealedStep() {
   state.players.forEach(p => {
-    if (!p.human) {
+    if (isComputer(p)) {
       state.auction.secret[p.id] = Math.min(p.cash, Math.max(0, estimateValue(state.auction.card.artist) + Math.floor(Math.random() * 13) - 6));
       p.status = "Secret bid locked";
     }
@@ -472,11 +525,21 @@ function sealedStep() {
 }
 
 function submitSecret(amount) {
-  const p = state.players[0];
+  if (networkMode === "guest") return sendAction("secret", { amount });
+  submitSecretFor(localPlayerId, amount);
+}
+function submitSecretFor(playerId, amount) {
+  const p = state.players[playerId];
   amount = Math.floor(+amount);
   if (amount < 0 || amount > p.cash) return toast("Choose an amount you can afford.");
-  state.auction.secret[0] = amount;
+  state.auction.secret[playerId] = amount;
   p.status = "Secret bid locked";
+  const waitingForHuman = state.players.some(player => player.human && state.auction.secret[player.id] === undefined);
+  if (waitingForHuman) {
+    state.message = "Waiting for the other private bid.";
+    render();
+    return;
+  }
   const bids = Object.entries(state.auction.secret).sort((a, b) => b[1] - a[1] || a[0] - b[0]);
   state.auction.bidder = +bids[0][0];
   state.auction.bid = bids[0][1];
@@ -496,12 +559,13 @@ function fixedStart() {
 }
 
 function setPrice(amount) {
+  if (networkMode === "guest") return sendAction("price", { amount });
   const seller = state.players[state.auction.seller];
   amount = Math.floor(+amount);
   if (amount < 1 || amount > 100) return toast("Choose a price from $1 to $100.");
   state.auction.bid = amount;
   beginFixedOffers();
-  if (!seller.human) render();
+  if (isComputer(seller)) render();
 }
 
 function beginFixedOffers() {
@@ -531,8 +595,12 @@ function nextFixedOffer() {
 }
 
 function fixedDecision(accept) {
-  state.players[0].status = accept ? `Accepted ${money(state.auction.bid)}` : "Passed";
-  if (accept) state.auction.bidder = 0;
+  if (networkMode === "guest") return sendAction("fixed", { accept });
+  fixedDecisionFor(localPlayerId, accept);
+}
+function fixedDecisionFor(playerId, accept) {
+  state.players[playerId].status = accept ? `Accepted ${money(state.auction.bid)}` : "Passed";
+  if (accept) state.auction.bidder = playerId;
   if (accept) resolveAuction();
   else {
     state.auction.fixedIndex++;
@@ -560,7 +628,7 @@ function doubleStart() {
       render(); setTimeout(resolveAuction, 650);
     } else if (matcher.human) {
       state.auction.matcher = matcher.id;
-      state.message = `You can match the Double with another ${artist(state.auction.card.artist).name}. Choose it from your hand.`;
+      state.message = `${matcher.name} can match the Double with another ${artist(state.auction.card.artist).name}.`;
       render();
     } else {
       state.auction.matcher = matcher.id;
@@ -571,6 +639,7 @@ function doubleStart() {
 }
 
 function addDouble(cardId, ownerId = state.auction.seller) {
+  if (networkMode === "guest") return sendAction("double", { cardId });
   const owner = state.players[ownerId];
   const i = owner.hand.findIndex(c => c.id === cardId && c.artist === state.auction.card.artist && c.type !== "double");
   if (i < 0) return;
@@ -609,7 +678,7 @@ function resolveAuction() {
     buyer.collection.push(...a.cards);
     buyer.status = `Bought ${a.cards.length > 1 ? "the pair" : artist(a.card.artist).name} for ${money(a.bid)}`;
     if (buyer.id !== seller.id) seller.status = `Sold for ${money(a.bid)}`;
-    toast(`${buyer.human ? "You buy" : `${buyer.name} buys`} ${a.cards.length > 1 ? "the pair" : "it"} for ${money(a.bid)}.`);
+    toast(`${isLocalPlayer(buyer) ? "You buy" : `${buyer.name} buys`} ${a.cards.length > 1 ? "the pair" : "it"} for ${money(a.bid)}.`);
     state.history.push({ kind: "auction", round: state.round, artist: a.card.artist, auctionType: a.originalType, seller: seller.name, buyer: buyer.name, price: a.bid, quantity: a.cards.length });
   }
   if (a.matchingSeller !== undefined) state.turn = a.matchingSeller;
@@ -649,7 +718,7 @@ function endRound(triggerCard) {
   state.phase = "choose";
   state.message = `Round scored: ${summary}. ${current().name} opens round ${state.round}.`;
   render();
-  if (!current().human) setTimeout(aiChoose, 900);
+  if (isComputer(current()) && networkMode !== "guest") setTimeout(aiChoose, 900);
 }
 
 function aiChoose() {
@@ -666,7 +735,7 @@ function render() {
   state.players.forEach(p => {
     if (!p.human && !p.avatar) p.avatar = AI_PEOPLE.find(ai => ai.name === p.name)?.avatar;
   });
-  localStorage.setItem("gallery-auction-save-v2", JSON.stringify(state));
+  if (networkMode !== "guest") localStorage.setItem("gallery-auction-save-v2", JSON.stringify(state));
   $("#round-title").textContent = `Round ${state.round} of 4`;
   renderGuide();
   renderMarket();
@@ -674,6 +743,7 @@ function render() {
   renderStage();
   renderYou();
   renderHistory();
+  if (networkMode === "host") broadcastState();
 }
 
 function renderHistory() {
@@ -707,7 +777,7 @@ function renderMarket() {
     `<div class="market-cell ${state.auction?.card.artist === a.id ? "active" : ""} ${extra}" style="--artist:${a.color}">${content}</div>`;
   $("#market").innerHTML = `<div class="market-grid">
     <div class="market-label corner">MARKET</div>
-    ${ARTISTS.map(a => cell(a, a.name, "market-artist")).join("")}
+    ${ARTISTS.map(a => cell(a, `<span class="market-art" style="--art:url('${a.image}')"></span><strong>${a.name}</strong>`, "market-artist")).join("")}
     <div class="market-label" title="Paintings on the table this round">🖼️ <span>This round</span></div>
     ${ARTISTS.map(a => {
       const count = state.tableCounts[a.id];
@@ -744,8 +814,8 @@ function renderPlayers() {
   $("#opponents").innerHTML = state.players.map(p => `
     <article class="player ${activeId === p.id ? "current" : ""} ${state.auction?.seller === p.id ? "seller" : ""}">
       <div class="player-profile">
-        ${p.avatar ? `<span class="avatar-wrap ${activeId === p.id ? "awake" : ""}"><img src="${p.avatar}" alt=""><i>😊</i></span>` : `<span class="you-avatar ${activeId === p.id ? "awake" : ""}">YOU</span>`}
-        <div class="player-copy"><div class="player-head"><strong>${p.name}${state.auction?.seller === p.id ? '<span class="seller-badge">SELLING</span>' : ""}</strong><span class="cash">${money(p.cash)}</span></div>
+        ${p.avatar ? `<span class="avatar-wrap ${activeId === p.id ? "awake" : ""}"><img src="${p.avatar}" alt=""><i>😊</i></span>` : `<span class="you-avatar ${activeId === p.id ? "awake" : ""}">${isLocalPlayer(p) ? "YOU" : p.name.slice(0,2).toUpperCase()}</span>`}
+        <div class="player-copy"><div class="player-head"><strong>${p.name}${p.online ? '<span class="online-pill">ONLINE</span>' : ""}${state.auction?.seller === p.id ? '<span class="seller-badge">SELLING</span>' : ""}</strong><span class="cash">${money(p.cash)}</span></div>
         <small>${p.hand.length} in hand · ${p.collection.length} in this round</small></div>
       </div>
       ${p.status ? `<div class="player-event">${p.status}</div>` : ""}
@@ -758,15 +828,18 @@ function activePlayerId() {
   if (a && state.phase === "fixed" && !a.bid) return a.seller;
   if (a && state.phase === "double") return a.matcher ?? a.seller;
   if (a && ["open", "once", "fixed"].includes(state.phase) && a.cursor !== undefined) return a.cursor;
-  if (a?.card.type === "sealed" && a.secret?.[0] === undefined) return 0;
+  if (a?.card.type === "sealed") {
+    const waiting = state.players.find(p => p.human && a.secret?.[p.id] === undefined);
+    if (waiting) return waiting.id;
+  }
   return state.turn;
 }
 
 function renderYou() {
-  const you = state.players[0];
-  const yourTurn = activePlayerId() === 0;
-  const canChoose = state.phase === "choose" && current().human;
-  const canDouble = state.phase === "double" && (state.auction?.seller === 0 || state.auction?.matcher === 0);
+  const you = localPlayer();
+  const yourTurn = activePlayerId() === localPlayerId;
+  const canChoose = state.phase === "choose" && canLocalAct(current());
+  const canDouble = state.phase === "double" && (state.auction?.seller === localPlayerId || state.auction?.matcher === localPlayerId);
   $("#you").classList.toggle("current-hand", yourTurn);
   $("#you").innerHTML = `
     <div class="hand-heading"><div><strong>Your private hand ${yourTurn ? '<span class="your-turn-badge">YOUR TURN</span>' : ""}</strong><small class="section-note">Only you can see these cards.</small></div><span>${you.hand.length} available to auction</span></div>
@@ -778,7 +851,7 @@ function renderYou() {
       </button>`;
     }).join("") || `<span class="empty">Your hand is empty.</span>`}</div>`;
   document.querySelectorAll(".hand-card:not(:disabled)").forEach(el => el.onclick = () =>
-    canDouble ? addDouble(el.dataset.card, 0) : playCard(el.dataset.card));
+    canDouble ? addDouble(el.dataset.card, localPlayerId) : playCard(el.dataset.card));
 }
 
 function renderStage() {
@@ -786,15 +859,20 @@ function renderStage() {
   let visual = "";
   let forecast = "";
   if (a) {
-    const ar = artist(a.card.artist), originalType = Object.entries(TYPES).find(([id]) => id === a.card.type)?.[1] || TYPES.open;
+    const ar = artist(a.card.artist), originalType = TYPES[a.originalType] || TYPES.open;
     const seller = state.players[a.seller];
-    visual = `<div class="auction-source">${seller.avatar ? `<img class="seller-avatar-photo" src="${seller.avatar}" alt="">` : `<span class="seller-avatar">${seller.name.slice(0,1)}</span>`}<span><strong>${seller.human ? "You are selling" : `${seller.name} played`} ${ar.name}</strong><small>${originalType.icon} ${originalType.name}</small></span></div>
-      <div class="auction-card" style="--artist:${ar.color};--art:url('${ar.image}')"><strong>${ar.name}</strong><span class="type">${originalType.icon} ${originalType.name}</span></div>`;
+    const quantity = a.cards.length;
+    const sellerText = quantity > 1
+      ? `${isLocalPlayer(seller) ? "You are" : `${seller.name} is`} selling 2 ${ar.name} paintings`
+      : `${isLocalPlayer(seller) ? "You are selling" : `${seller.name} played`} ${ar.name}`;
+    const typeText = quantity > 1 ? `${originalType.icon} ${originalType.name} · Open bidding for the pair` : `${originalType.icon} ${originalType.name}`;
+    const cardMarkup = `<div class="auction-card" style="--artist:${ar.color};--art:url('${ar.image}')"><strong>${ar.name}</strong><span class="type">${originalType.icon} ${originalType.name}</span></div>`;
+    visual = `<div class="auction-source">${seller.avatar ? `<img class="seller-avatar-photo" src="${seller.avatar}" alt="">` : `<span class="seller-avatar">${seller.name.slice(0,1)}</span>`}<span><strong>${sellerText}</strong><small>${typeText}</small></span></div>
+      <div class="auction-lot ${quantity > 1 ? "is-pair" : ""}" aria-label="${quantity} ${ar.name} painting${quantity > 1 ? "s" : ""}">${cardMarkup}${quantity > 1 ? cardMarkup : ""}</div>`;
     const ranked = [...ARTISTS].sort((x, y) => state.tableCounts[y.id] - state.tableCounts[x.id] || ARTISTS.indexOf(x) - ARTISTS.indexOf(y));
     const place = ranked.findIndex(x => x.id === ar.id) + 1;
     const bonus = [30, 20, 10, 0, 0][place - 1];
     const earlier = state.marketValues[ar.id];
-    const quantity = a.cards.length;
     const eachValue = earlier + bonus;
     const placeName = ["1st", "2nd", "3rd", "4th", "5th"][place - 1];
     forecast = `<aside class="value-forecast" style="--artist:${ar.color}">
@@ -811,31 +889,38 @@ function renderStage() {
     </aside>`;
   }
   let controls = "";
-  const you = state.players[0];
+  const you = localPlayer();
   if (state.phase === "gameover") controls = `<button class="primary big" onclick="location.reload()">Play again</button>`;
-  else if (a?.card.type === "sealed" && a.secret?.[0] === undefined)
+  else if (a?.card.type === "sealed" && a.secret?.[localPlayerId] === undefined)
     controls = bidInput("Lock in private bid", "submitSecret");
-  else if (state.phase === "fixed" && a?.seller === 0 && !a.bid)
+  else if (state.phase === "fixed" && a?.seller === localPlayerId && !a.bid)
     controls = bidInput("Set price", "setPrice");
-  else if (state.phase === "fixed" && a?.cursor === 0 && a.seller !== 0)
+  else if (state.phase === "fixed" && a?.cursor === localPlayerId && a.seller !== localPlayerId)
     controls = `<div class="actions"><button class="primary" onclick="fixedDecision(true)">Accept ${money(a.bid)}</button><button onclick="fixedDecision(false)">Pass</button></div>`;
-  else if ((state.phase === "open" || state.phase === "once") && a?.cursor === 0 && !you.passed)
-    controls = `${bidInput("Raise bid", "humanBid")}<div class="actions"><button onclick="passBid(state.players[0])">Pass</button></div>`;
-  else if (state.phase === "choose" && current().human)
+  else if ((state.phase === "open" || state.phase === "once") && a?.cursor === localPlayerId && !you.passed)
+    controls = `${bidInput("Raise bid", "humanBid")}<div class="actions"><button onclick="humanPass()">Pass</button></div>`;
+  else if (state.phase === "choose" && canLocalAct(current()))
     controls = `<p class="auction-copy">Choose any painting from your hand below.</p>`;
-  else if (state.phase === "double" && (a?.seller === 0 || a?.matcher === 0))
+  else if (state.phase === "double" && (a?.seller === localPlayerId || a?.matcher === localPlayerId))
     controls = `<p class="auction-copy">Choose a second ${artist(a.card.artist).name} painting from your hand.</p>`;
   $("#stage").innerHTML = `<div class="stage-inner"><div class="stage-layout"><div class="auction-focus">${visual}<h2>${stageTitle()}</h2><p class="instruction">${state.message}</p>${controls}</div>${forecast}</div></div>`;
 }
 
 function bidInput(label, fn) {
   const min = (state.auction?.bid || 0) + 1;
-  return `<div class="bid-row"><span>$</span><input id="bid-input" type="number" min="${min}" max="${state.players[0].cash}" value="${Math.min(state.players[0].cash, Math.max(min, 10))}"><button class="primary" onclick="${fn}(document.querySelector('#bid-input').value)">${label}</button></div>`;
+  return `<div class="bid-row"><span>$</span><input id="bid-input" type="number" min="${min}" max="${localPlayer().cash}" value="${Math.min(localPlayer().cash, Math.max(min, 10))}"><button class="primary" onclick="${fn}(document.querySelector('#bid-input').value)">${label}</button></div>`;
 }
-function humanBid(amount) { placeBid(state.players[0], amount); }
+function humanBid(amount) {
+  if (networkMode === "guest") return sendAction("bid", { amount });
+  placeBid(localPlayer(), amount);
+}
+function humanPass() {
+  if (networkMode === "guest") return sendAction("pass");
+  passBid(localPlayer());
+}
 function stageTitle() {
   if (state.phase === "gameover") return "The final hammer falls";
-  if (!state.auction) return current().human ? "Your turn" : `${current().name} is choosing`;
+  if (!state.auction) return canLocalAct(current()) ? "Your turn" : `${current().name} is choosing`;
   return TYPES[state.auction.card.type]?.name || "Auction in progress";
 }
 function toast(text) {
@@ -843,14 +928,124 @@ function toast(text) {
   clearTimeout(toast.timer); toast.timer = setTimeout(() => el.classList.remove("show"), 3800);
 }
 
+function roomCodeFromId(id) {
+  return id.replace(/^modern-art-/, "").toUpperCase();
+}
+function peerIdFromCode(code) {
+  return `modern-art-${String(code).trim().toLowerCase().replace(/[^a-z0-9-]/g, "")}`;
+}
+function makeRoomCode() {
+  return Math.random().toString(36).slice(2, 8).toUpperCase();
+}
+function setRoomStatus(html) {
+  $("#room-status").innerHTML = html;
+}
+function createRoom() {
+  if (typeof Peer === "undefined") return setRoomStatus("Online play could not load. Check your connection and refresh.");
+  networkMode = "host";
+  localPlayerId = 0;
+  const code = makeRoomCode();
+  roomId = peerIdFromCode(code);
+  setRoomStatus("Creating your room…");
+  peer = new Peer(roomId);
+  peer.on("open", () => {
+    const link = `${location.origin}${location.pathname}?room=${code}`;
+    setRoomStatus(`Room <strong>${code}</strong> is ready. <a href="${link}">Copy or send this link</a>. Waiting for Greg…`);
+    $("#room-code").value = code;
+    startGame();
+  });
+  peer.on("connection", connection => {
+    if (guestConnections.length) {
+      connection.on("open", () => connection.send({ type: "error", message: "This room already has two human players." }));
+      return;
+    }
+    guestConnections.push(connection);
+    connection.on("data", message => handleHostMessage(connection, message));
+    connection.on("open", () => {
+      if (state) {
+        state.players[1].name = "Greg";
+        state.players[1].online = true;
+        state.players[1].human = true;
+        connection.send({ type: "state", state, seat: 1, room: code });
+        render();
+        toast("Greg joined the table.");
+      }
+    });
+    connection.on("close", () => {
+      guestConnections = guestConnections.filter(c => c !== connection);
+      if (state?.players?.[1]) {
+        state.players[1].online = false;
+        state.players[1].status = "Disconnected";
+        render();
+      }
+    });
+  });
+  peer.on("error", error => setRoomStatus(`Could not create the room: ${error.type || "connection error"}.`));
+}
+function joinRoom() {
+  if (typeof Peer === "undefined") return setRoomStatus("Online play could not load. Check your connection and refresh.");
+  const code = $("#room-code").value.trim();
+  if (!code) return setRoomStatus("Enter the room code Greg sent you.");
+  networkMode = "guest";
+  localPlayerId = 1;
+  setRoomStatus("Joining the room…");
+  peer = new Peer();
+  peer.on("open", () => {
+    hostConnection = peer.connect(peerIdFromCode(code), { reliable: true });
+    hostConnection.on("open", () => setRoomStatus("Connected. Waiting for the table…"));
+    hostConnection.on("data", handleGuestMessage);
+    hostConnection.on("close", () => toast("The host disconnected."));
+    hostConnection.on("error", () => setRoomStatus("Could not connect to that room."));
+  });
+  peer.on("error", error => setRoomStatus(`Could not join: ${error.type || "connection error"}.`));
+}
+function handleGuestMessage(message) {
+  if (message?.type === "error") return setRoomStatus(message.message);
+  if (message?.type !== "state") return;
+  state = message.state;
+  localPlayerId = message.seat;
+  $("#setup").classList.add("hidden");
+  $("#game").classList.remove("hidden");
+  render();
+}
+function sendAction(action, payload = {}) {
+  if (!hostConnection?.open) return toast("You are not connected to the host.");
+  hostConnection.send({ type: "action", action, payload });
+}
+function handleHostMessage(connection, message) {
+  if (message?.type !== "action" || !state) return;
+  const playerId = 1;
+  const p = state.players[playerId];
+  const { action, payload = {} } = message;
+  if (action === "play" && state.phase === "choose" && state.turn === playerId) launchCard(p, payload.cardId);
+  else if (action === "bid" && activePlayerId() === playerId) placeBid(p, payload.amount);
+  else if (action === "pass" && activePlayerId() === playerId) passBid(p);
+  else if (action === "secret" && state.auction?.card.type === "sealed" && state.auction.secret?.[playerId] === undefined) submitSecretFor(playerId, payload.amount);
+  else if (action === "price" && state.phase === "fixed" && state.auction?.seller === playerId && !state.auction.bid) {
+    const amount = Math.floor(+payload.amount);
+    if (amount >= 1 && amount <= 100) {
+      state.auction.bid = amount;
+      beginFixedOffers();
+    }
+  }
+  else if (action === "fixed" && state.phase === "fixed" && state.auction?.cursor === playerId) fixedDecisionFor(playerId, !!payload.accept);
+  else if (action === "double" && state.phase === "double" && (state.auction?.seller === playerId || state.auction?.matcher === playerId)) addDouble(payload.cardId, playerId);
+}
+function broadcastState() {
+  const packet = { type: "state", state, seat: 1, room: roomCodeFromId(roomId) };
+  guestConnections.filter(c => c.open).forEach(c => c.send(packet));
+}
+
 $("#start-game").onclick = startGame;
+$("#host-game").onclick = createRoom;
+$("#join-game").onclick = joinRoom;
 $("#new-game").onclick = () => { localStorage.removeItem("gallery-auction-save-v2"); location.reload(); };
 $("#continue-game").onclick = () => {
   state = JSON.parse(localStorage.getItem("gallery-auction-save-v2"));
   $("#setup").classList.add("hidden");
   $("#game").classList.remove("hidden");
   render();
-  if (state.phase === "choose" && !current().human) setTimeout(aiChoose, 500);
+  if (state.phase === "choose" && isComputer(current())) setTimeout(aiChoose, 500);
 };
 $("#help-button").onclick = () => $("#help-dialog").showModal();
 $(".dialog-close").onclick = () => $("#help-dialog").close();
@@ -859,6 +1054,11 @@ $(".history-close").onclick = () => $("#history-dialog").close();
 renderStaticGuide();
 document.querySelectorAll("[data-version]").forEach(el => el.textContent = `v${VERSION}`);
 if (localStorage.getItem("gallery-auction-save-v2")) $("#continue-game").classList.remove("hidden");
+const roomFromLink = new URLSearchParams(location.search).get("room");
+if (roomFromLink) {
+  $("#room-code").value = roomFromLink.toUpperCase();
+  setRoomStatus(`Room ${roomFromLink.toUpperCase()} is ready to join.`);
+}
 function renderStaticGuide() {
   $("#help-types").innerHTML = Object.values(TYPES).map(t =>
     `<div class="help-type"><span class="guide-icon">${t.icon}</span><strong>${t.name}</strong><span>${t.copy}</span></div>`).join("");
