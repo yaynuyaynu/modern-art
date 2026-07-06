@@ -185,6 +185,7 @@ body.win-celebration::after { content: ""; position: fixed; z-index: 200; inset:
 .auction-source { grid-column: 1; justify-self: center; margin-bottom: 6px; }
 .auction-lot { grid-column: 1; grid-row: 2 / span 3; }
 .auction-focus > h2, .auction-focus > .instruction, .auction-focus > .bid-row, .auction-focus > .actions, .auction-focus > .auction-copy { grid-column: 2; }
+.auction-focus > .live-actions { grid-column: 2; }
 .auction-focus > h2 { align-self: end; margin-top: 0; }
 .auction-focus > .instruction { margin: 4px 0 10px; }
 .auction-focus > .bid-row, .auction-focus > .actions { justify-self: center; }
@@ -199,6 +200,11 @@ body.win-celebration::after { content: ""; position: fixed; z-index: 200; inset:
 .context-row { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid #eee9e0; }
 .round-warning { margin: 14px 0 0; padding: 9px 11px; border-radius: 7px; background: #f5efe4; font-weight: 800; font-size: .84rem; }
 .instruction { color: var(--muted); margin-bottom: 16px; }
+.thinking-note { display: block; margin-top: 4px; color: var(--gold); font-size: .75rem; font-weight: 850; }
+.live-actions { height: 66px; min-height: 66px; max-height: 66px; display: flex; flex-direction: column; gap: 1px; align-self: start; overflow: hidden; margin-top: 8px; padding: 7px 10px; border-left: 4px solid var(--gold); border-radius: 7px; background: var(--paper); color: var(--muted); text-align: left; font-size: .68rem; line-height: 1.13; }
+.live-actions > strong { color: var(--ink); font-size: .72rem; }
+.live-actions span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.live-actions b { color: var(--ink); }
 .auction-card { width: 170px; height: 215px; margin: 0 auto 14px; display: grid; align-content: space-between; padding: 12px; text-align: left; border: 8px solid white; background: linear-gradient(to bottom, rgba(0,0,0,.05) 45%, rgba(0,0,0,.78)), var(--art) center/cover; color: white; text-shadow: 0 1px 3px #000; box-shadow: 0 16px 30px rgba(0,0,0,.23); transform: rotate(-1deg); }
 .auction-card > strong { white-space: nowrap; font-size: clamp(.78rem, 1.1vw, .95rem); letter-spacing: -.02em; }
 .auction-card .type { align-self: end; font-weight: 900; }
@@ -419,7 +425,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
       </div>
       <div class="top-actions">
         <button id="options-button" class="quiet options-button">⚙ Settings</button>
-        <button id="history-button" class="quiet">History <span id="history-count"></span></button>
+        <button id="history-button" class="quiet">Auction log <span id="history-count"></span></button>
         <button id="help-button" class="quiet">How to play</button>
         <button id="new-game" class="quiet">New game</button>
       </div>
@@ -452,9 +458,9 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
     </label>
     <label>Game pace
       <select id="ai-pace">
-        <option value="2400">Easy to follow</option>
-        <option value="1600">Normal</option>
-        <option value="700">Quick</option>
+        <option value="2400">Easy to follow (2.4 sec)</option>
+        <option value="1600">Normal (1.6 sec)</option>
+        <option value="700">Quick (0.7 sec)</option>
         <option value="0">No pauses</option>
       </select>
     </label>
@@ -500,7 +506,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.13.3";
+const VERSION = "0.14.0";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -583,7 +589,7 @@ const FAMILY_VOICE = {
 const familyQuipTimers = {};
 
 let state = null;
-let aiPace = +(localStorage.getItem("modern-art-ai-pace") || 2400);
+let aiPace = +(localStorage.getItem("modern-art-ai-pace") || 1600);
 if (![2400, 1600, 700, 0].includes(aiPace)) aiPace = 2400;
 let historySidebarVisible = localStorage.getItem("modern-art-history-sidebar") === "true";
 function aiDelay(scale = 1) { return Math.round(aiPace * scale); }
@@ -728,9 +734,12 @@ function canLocalAct(p) { return !!p && p.human && isLocalPlayer(p); }
 function recordTurnAction(player, text) {
   if (!state.auction) return;
   state.auction.actionsByPlayer ||= {};
+  state.auction.timeline ||= [];
   const actions = state.auction.actionsByPlayer[player.id] ||= [];
   actions.push(text);
   if (actions.length > 4) actions.shift();
+  state.auction.timeline.push({ player: player.name, text });
+  if (state.auction.timeline.length > 8) state.auction.timeline.shift();
 }
 function nextTurn() {
   state.turn = (state.turn + 1) % state.players.length;
@@ -1344,10 +1353,11 @@ function renderStage() {
     const eachValue = earlier + bonus;
     const placeName = ["1st", "2nd", "3rd", "4th", "5th"][place - 1];
     forecast = `<aside class="value-forecast" style="--artist:${ar.color}">
-      <p class="eyebrow">If the round ended now</p>
-      <div class="forecast-now"><strong>${placeName}</strong><span>${money(eachValue)} each</span></div>
+      <p class="eyebrow">Projected value right now</p>
+      <div class="forecast-now"><strong>${placeName} place</strong><span>${money(eachValue)} per painting</span></div>
       ${quantity > 1 ? `<div class="pair-total"><span>${money(eachValue)} × ${quantity} paintings</span><strong>${money(eachValue * quantity)} for the pair</strong></div>` : ""}
-      <p>${money(earlier)} from earlier rounds + ${money(bonus)} this round${quantity > 1 ? ", for each painting" : ""}</p>
+      <p><strong>${ar.name}</strong> currently ranks ${placeName}. If the round ended now, each painting would sell for ${money(eachValue)}.</p>
+      <p>${money(earlier)} carried forward + ${money(bonus)} from this round${quantity > 1 ? ", for each painting" : ""}</p>
       <div class="possible-values">
         <span><b>1st</b>${money((earlier + 30) * quantity)}${quantity > 1 ? "<small>pair</small>" : ""}</span>
         <span><b>2nd</b>${money((earlier + 20) * quantity)}${quantity > 1 ? "<small>pair</small>" : ""}</span>
@@ -1357,6 +1367,9 @@ function renderStage() {
     </aside>`;
   }
   let controls = "";
+  const liveActions = a?.timeline?.length
+    ? `<div class="live-actions"><strong>Live auction</strong>${a.timeline.slice(-4).map(item => `<span><b>${item.player}:</b> ${item.text}</span>`).join("")}</div>`
+    : `<div class="live-actions empty-actions"><strong>Live auction</strong><span>Actions will appear here.</span></div>`;
   const you = localPlayer();
   if (state.phase === "gameover") controls = `<button class="primary big" onclick="location.reload()">Play again</button>`;
   else if (a?.card.type === "sealed" && a.secret?.[localPlayerId] === undefined)
@@ -1372,7 +1385,11 @@ function renderStage() {
   else if (state.phase === "double" && a?.matcher === localPlayerId)
     controls = `<p class="auction-copy">Choose a matching ${artist(a.card.artist).name} painting, or pass.</p>
       <div class="actions"><button onclick="passDouble()">Pass</button></div>`;
-  $("#stage").innerHTML = `<div class="stage-inner"><div class="stage-layout"><div class="auction-focus">${visual}<h2>${stageTitle()}</h2><p class="instruction">${state.message}</p>${controls}</div>${forecast}</div></div>`;
+  const actingPlayer = state.players[activePlayerId()];
+  const waitingMessage = isComputer(actingPlayer) && aiPace > 0
+    ? ` <span class="thinking-note">Thinking… next action in about ${(aiPace / 1000).toFixed(1)} seconds.</span>`
+    : "";
+  $("#stage").innerHTML = `<div class="stage-inner"><div class="stage-layout"><div class="auction-focus">${visual}<h2>${stageTitle()}</h2><p class="instruction">${state.message}${waitingMessage}</p>${controls}${liveActions}</div>${forecast}</div></div>`;
 }
 
 function bidInput(label, fn) {
