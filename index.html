@@ -49,6 +49,19 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 .game { max-width: 1500px; margin: auto; padding: 18px; }
 .topbar { display: flex; justify-content: space-between; align-items: center; gap: 20px; height: 62px; min-height: 62px; max-height: 62px; margin-bottom: 14px; overflow: hidden; }
 .top-actions { display: flex; gap: 8px; }
+.history-sidebar { position: fixed; z-index: 80; top: 14px; right: 14px; bottom: 14px; width: 286px; height: calc(100dvh - 28px); display: none; overflow: hidden; padding: 16px 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,253,248,.98); box-shadow: -12px 0 38px rgba(42,34,23,.18); }
+.history-sidebar.open { display: grid; grid-template-rows: auto minmax(0, 1fr); }
+.history-sidebar-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; padding: 2px 3px 12px; border-bottom: 1px solid var(--line); }
+.history-sidebar-head h2 { margin: 3px 0 0; font: 700 1.25rem/1.1 Georgia, serif; }
+.history-sidebar-head button { flex: 0 0 32px; width: 32px; height: 32px; padding: 0; font-size: 1.25rem; }
+.history-sidebar .history-list { height: 100%; max-height: none; overflow-y: auto; padding: 12px 3px 4px 0; }
+.history-sidebar .history-item { padding: 9px 10px; font-size: .78rem; }
+.options-dialog { width: min(460px, calc(100% - 28px)); }
+.options-dialog > label:not(.option-row) { margin-top: 20px; }
+.option-row { grid-template-columns: 22px 1fr; align-items: start; gap: 11px; padding: 14px; border-radius: 10px; background: var(--paper); }
+.option-row input { width: 19px; height: 19px; min-height: 0; margin-top: 2px; }
+.option-row span, .option-row small { display: block; }
+.option-row small { margin-top: 3px; color: var(--muted); font-weight: 500; }
 .auction-guide { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; padding: 10px; background: rgba(255,253,248,.76); border: 1px solid var(--line); border-radius: 14px 14px 0 0; }
 .guide-item { position: relative; display: flex; align-items: center; gap: 10px; min-width: 0; padding: 9px 10px; border-radius: 10px; color: var(--muted); opacity: .7; }
 .guide-item.active { grid-column: span 2; color: var(--ink); background: #fff6dd; box-shadow: 0 5px 18px rgba(0,0,0,.1); outline: 3px solid var(--gold); opacity: 1; }
@@ -124,6 +137,7 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 .player-head { display: flex; justify-content: space-between; gap: 8px; }
 .player-head strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .seller-badge { display: inline-block; margin-left: 8px; padding: 2px 7px; border-radius: 99px; background: var(--gold); color: white; font-size: .58rem; letter-spacing: .08em; vertical-align: 2px; }
+.starter-badge { display: inline-block; margin-left: 8px; padding: 3px 8px; border-radius: 99px; background: #23704d; color: white; font-size: .58rem; letter-spacing: .07em; vertical-align: 2px; }
 .cash { display: inline-flex; align-items: center; justify-content: center; min-width: 72px; padding: 7px 10px; border: 2px solid #9bc9ad; border-radius: 999px; background: #e5f4ea; color: #17633f; font-size: 1.15rem; font-weight: 950; box-shadow: inset 0 1px white, 0 2px 6px rgba(35,112,77,.12); }
 .collection { display: flex; flex: 1 1 auto; flex-wrap: nowrap; align-items: flex-start; gap: 4px; min-height: 74px; margin-top: 7px; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; }
 .collection .empty { padding-top: 3px; }
@@ -369,6 +383,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
         <h1 id="round-title">Round 1 of 4</h1>
       </div>
       <div class="top-actions">
+        <button id="options-button" class="quiet">Options</button>
         <button id="history-button" class="quiet">History <span id="history-count"></span></button>
         <button id="help-button" class="quiet">How to play</button>
         <button id="new-game" class="quiet">New game</button>
@@ -384,6 +399,30 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
     </section>
     <footer class="game-footer"><span>◆</span> <strong>StrelSoft Software</strong></footer>
   </main>
+
+  <aside id="history-sidebar" class="history-sidebar" aria-label="Game history">
+    <div class="history-sidebar-head">
+      <div><p class="eyebrow">Game record</p><h2>What happened</h2></div>
+      <button id="history-sidebar-close" aria-label="Hide history">×</button>
+    </div>
+    <div id="side-history-list" class="history-list"></div>
+  </aside>
+
+  <dialog id="options-dialog" class="options-dialog">
+    <button id="options-close" class="dialog-close" aria-label="Close">×</button>
+    <h2>Options</h2>
+    <label class="option-row">
+      <input id="show-history-sidebar" type="checkbox">
+      <span><strong>Show game history</strong><small>Keep a round-by-round record on the right.</small></span>
+    </label>
+    <label>Computer pace
+      <select id="ai-pace">
+        <option value="1800">Easy to follow</option>
+        <option value="1200">Normal</option>
+        <option value="700">Quick</option>
+      </select>
+    </label>
+  </dialog>
 
   <dialog id="help-dialog">
     <button class="dialog-close" aria-label="Close">×</button>
@@ -418,7 +457,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.11.3";
+const VERSION = "0.12.0";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -501,6 +540,9 @@ const FAMILY_VOICE = {
 const familyQuipTimers = {};
 
 let state = null;
+let aiPace = +(localStorage.getItem("modern-art-ai-pace") || 1800);
+let historySidebarVisible = localStorage.getItem("modern-art-history-sidebar") === "true";
+function aiDelay(scale = 1) { return Math.round(aiPace * scale); }
 let networkMode = "solo";
 let localPlayerId = 0;
 let peer = null;
@@ -583,7 +625,7 @@ function startGame(options = {}) {
     roundHistory: [],
     history: [],
     auction: null, message: "Choose a painting from your hand to begin the auction.",
-    familyBanter,
+    familyBanter, openingAnnouncement: true,
     players: Array.from({ length: count }, (_, i) => ({
       id: i, name: i === 0 ? playerName : roster[i].name, characterKey: roster[i].key || null,
       avatar: roster[i].avatar || null,
@@ -591,17 +633,18 @@ function startGame(options = {}) {
       cash: 100, hand: [], collection: [], passed: false, status: ""
     }))
   };
+  state.startingPlayerId = state.turn;
   if (networkMode === "host") {
     state.players[0].name = playerName;
     state.players[1].name = options.guestName || "Guest";
     state.players[1].avatar = null;
   }
   deal(roundDealCount());
-  state.message = `${current().name} was randomly chosen to start.`;
+  state.message = `${current().name} was randomly chosen to go first. ${current().name} plays the first painting.`;
   $("#setup").classList.add("hidden");
   $("#game").classList.remove("hidden");
   render();
-  if (isComputer(current())) setTimeout(aiChoose, 900);
+  if (isComputer(current())) setTimeout(aiChoose, aiDelay(1.35));
 }
 
 function roundDealCount() {
@@ -636,7 +679,7 @@ function nextTurn() {
   state.players.forEach(p => p.passed = false);
   state.message = `${current().name} chooses a painting to auction.`;
   render();
-  if (isComputer(current()) && networkMode !== "guest") setTimeout(aiChoose, 650);
+  if (isComputer(current()) && networkMode !== "guest") setTimeout(aiChoose, aiDelay());
 }
 
 function playCard(cardId) {
@@ -650,6 +693,7 @@ function launchCard(player, cardId) {
   const index = player.hand.findIndex(c => c.id === cardId);
   if (index < 0) return;
   const card = player.hand.splice(index, 1)[0];
+  state.openingAnnouncement = false;
   state.players.forEach(p => { p.status = ""; p.reaction = ""; p.quip = ""; });
   player.status = `Selling ${artist(card.artist).name} · ${TYPES[card.type].name}`;
   state.auction = { card, originalType: card.type, seller: player.id, cards: [card], bid: 0, bidder: null, acted: [], cursor: (player.id + 1) % state.players.length };
@@ -680,7 +724,7 @@ function auctionTurn() {
     const p = state.players[a.cursor];
     state.message = `${p.name} has one chance to bid above ${money(a.bid)} or pass.`;
     render();
-    if (isComputer(p) && networkMode !== "guest") setTimeout(() => aiBid(p), 500);
+    if (isComputer(p) && networkMode !== "guest") setTimeout(() => aiBid(p), aiDelay());
     return;
   }
   const eligible = state.players.filter(p => !p.passed);
@@ -690,7 +734,7 @@ function auctionTurn() {
   state.phase = state.auction.card.type;
   state.message = `${p.name}: raise above ${money(a.bid)} or pass.`;
   render();
-  if (isComputer(p) && networkMode !== "guest") setTimeout(() => aiBid(p), 500);
+  if (isComputer(p) && networkMode !== "guest") setTimeout(() => aiBid(p), aiDelay());
 }
 
 function aiBid(p) {
@@ -807,7 +851,7 @@ function nextFixedOffer() {
     a.bidder = p.id; return resolveAuction();
   }
   a.fixedIndex++;
-  setTimeout(nextFixedOffer, 300);
+  setTimeout(nextFixedOffer, aiDelay(.7));
 }
 
 function fixedDecision(accept) {
@@ -855,7 +899,7 @@ function offerDoubleMatch() {
     render();
     if (isComputer(player) && networkMode !== "guest") {
       const match = matches[Math.floor(Math.random() * matches.length)];
-      setTimeout(() => Math.random() < .8 ? addDouble(match.id, player.id) : passDoubleFor(player.id), 450);
+      setTimeout(() => Math.random() < .8 ? addDouble(match.id, player.id) : passDoubleFor(player.id), aiDelay());
     }
     return;
   }
@@ -975,7 +1019,7 @@ function endRound(triggerCard) {
 }
 
 function aiChoose() {
-  if ($("#new-cards-dialog")?.open || $("#round-results-dialog")?.open) return setTimeout(aiChoose, 500);
+  if ($("#new-cards-dialog")?.open || $("#round-results-dialog")?.open) return setTimeout(aiChoose, aiDelay(.5));
   const p = current();
   if (!p.hand.length) return nextTurn();
   const playable = p.hand.filter(c => c.type !== "double" || p.hand.some(x => x.artist === c.artist && x.id !== c.id));
@@ -1008,6 +1052,12 @@ function renderNewCards() {
   const cards = deal?.cardsByPlayer?.[localPlayerId] || [];
   if (!deal || !cards.length || seenDealId === deal.id) return;
   const dialog = $("#new-cards-dialog");
+  const starter = state.players[state.startingPlayerId];
+  const isOpeningDeal = state.round === 1 && state.openingAnnouncement;
+  $(".new-cards-dialog > p:not(.eyebrow)").textContent = isOpeningDeal
+    ? `${starter.name} was randomly chosen to go first. After this window closes, ${starter.name} plays the first painting.`
+    : "These were just added to your private hand.";
+  $("#new-cards-close").textContent = isOpeningDeal ? `Start — ${starter.name} goes first` : "Got it";
   $("#new-cards-list").innerHTML = cards.map(c => {
     const ar = artist(c.artist);
     return `<div class="new-card" style="--artist:${ar.color};--art:url('${ar.image}')">
@@ -1042,7 +1092,7 @@ function renderRoundResults() {
 function renderHistory() {
   $("#history-count").textContent = state.history.length ? `(${state.history.length})` : "";
   const items = [...state.history].reverse();
-  $("#history-list").innerHTML = items.length ? items.map(item => {
+  const markup = items.length ? items.map(item => {
     if (item.kind === "auction") {
       const ar = artist(item.artist);
       return `<article class="history-item auction-history" style="--artist:${ar.color}">
@@ -1057,6 +1107,9 @@ function renderHistory() {
       <span>${Object.entries(item.payouts).map(([name, value]) => `${name}: +${money(value)}`).join(" · ")}</span>
     </article>`;
   }).join("") : `<p class="empty">Auctions and round results will appear here.</p>`;
+  $("#history-list").innerHTML = markup;
+  $("#side-history-list").innerHTML = markup;
+  $("#history-sidebar").classList.toggle("open", historySidebarVisible);
 }
 
 function renderGuide() {
@@ -1112,7 +1165,7 @@ function renderPlayers() {
       <div class="player-profile">
         ${avatarMarkup(p, `mood-${mood} ${activeId === p.id ? "awake" : ""}`)}
         ${p.quip ? `<div class="player-quote">“${p.quip}”</div>` : ""}
-        <div class="player-copy"><div class="player-head"><strong>${p.name}${p.online ? '<span class="online-pill">ONLINE</span>' : ""}${state.auction?.seller === p.id ? '<span class="seller-badge">SELLING</span>' : ""}</strong><span class="cash">${money(p.cash)}</span></div>
+        <div class="player-copy"><div class="player-head"><strong>${p.name}${p.online ? '<span class="online-pill">ONLINE</span>' : ""}${state.openingAnnouncement && state.startingPlayerId === p.id ? '<span class="starter-badge">GOES FIRST</span>' : ""}${state.auction?.seller === p.id ? '<span class="seller-badge">SELLING</span>' : ""}</strong><span class="cash">${money(p.cash)}</span></div>
         <small>${p.hand.length} in hand · ${p.collection.length} in this round</small></div>
       </div>
       ${p.status ? `<div class="player-event">${p.status}</div>` : ""}
@@ -1438,22 +1491,43 @@ $("#continue-game").onclick = () => {
   $("#setup").classList.add("hidden");
   $("#game").classList.remove("hidden");
   render();
-  if (state.phase === "choose" && isComputer(current())) setTimeout(aiChoose, 500);
+  if (state.phase === "choose" && isComputer(current())) setTimeout(aiChoose, aiDelay());
 };
 $("#help-button").onclick = () => $("#help-dialog").showModal();
 $(".dialog-close").onclick = () => $("#help-dialog").close();
+$("#options-button").onclick = () => {
+  $("#show-history-sidebar").checked = historySidebarVisible;
+  $("#ai-pace").value = String(aiPace);
+  $("#options-dialog").showModal();
+};
+$("#options-close").onclick = () => $("#options-dialog").close();
+$("#show-history-sidebar").onchange = event => {
+  historySidebarVisible = event.target.checked;
+  localStorage.setItem("modern-art-history-sidebar", String(historySidebarVisible));
+  $("#history-sidebar").classList.toggle("open", historySidebarVisible);
+};
+$("#history-sidebar-close").onclick = () => {
+  historySidebarVisible = false;
+  localStorage.setItem("modern-art-history-sidebar", "false");
+  $("#history-sidebar").classList.remove("open");
+  $("#show-history-sidebar").checked = false;
+};
+$("#ai-pace").onchange = event => {
+  aiPace = +event.target.value;
+  localStorage.setItem("modern-art-ai-pace", String(aiPace));
+};
 $("#history-button").onclick = () => $("#history-dialog").showModal();
 $(".history-close").onclick = () => $("#history-dialog").close();
 $("#new-cards-close").onclick = () => {
   seenDealId = state?.lastDeal?.id || seenDealId;
   $("#new-cards-dialog").close();
-  if (isComputer(current()) && networkMode !== "guest") setTimeout(aiChoose, 350);
+  if (isComputer(current()) && networkMode !== "guest") setTimeout(aiChoose, aiDelay());
 };
 $("#round-results-close").onclick = () => {
   state.roundPresentation = null;
   $("#round-results-dialog").close();
   renderNewCards();
-  if (!$("#new-cards-dialog").open && isComputer(current()) && networkMode !== "guest") setTimeout(aiChoose, 350);
+  if (!$("#new-cards-dialog").open && isComputer(current()) && networkMode !== "guest") setTimeout(aiChoose, aiDelay());
 };
 renderStaticGuide();
 document.querySelectorAll("[data-version]").forEach(el => el.textContent = `v${VERSION}`);
