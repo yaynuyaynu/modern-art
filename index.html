@@ -515,7 +515,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.14.2";
+const VERSION = "0.14.3";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -754,7 +754,7 @@ function nextTurn() {
   state.phase = "choose";
   state.auction = null;
   state.players.forEach(p => p.passed = false);
-  state.message = `${current().name} chooses a painting to auction.`;
+  state.message = isLocalPlayer(current()) ? "You choose a painting to auction." : `${current().name} chooses a painting to auction.`;
   render();
   if (isComputer(current()) && networkMode !== "guest") setTimeout(aiChoose, aiDelay());
 }
@@ -800,7 +800,9 @@ function auctionTurn() {
     if (bidders.every(p => a.acted.includes(p.id))) return resolveAuction();
     while (a.acted.includes(state.players[a.cursor].id)) a.cursor = (a.cursor + 1) % state.players.length;
     const p = state.players[a.cursor];
-    state.message = `${p.name} has one chance to bid above ${money(a.bid)} or pass.`;
+    state.message = isLocalPlayer(p)
+      ? `You have one chance to bid above ${money(a.bid)} or pass.`
+      : `${p.name} has one chance to bid above ${money(a.bid)} or pass.`;
     render();
     if (isComputer(p) && networkMode !== "guest") setTimeout(() => aiBid(p), aiDelay());
     return;
@@ -894,7 +896,9 @@ function fixedStart() {
   if (seller.cash < 1) {
     state.auction.bid = 0;
     state.auction.bidder = seller.id;
-    state.message = `${seller.name} has no cash available to set a fixed price and keeps the painting for free.`;
+    state.message = isLocalPlayer(seller)
+      ? "You have no cash available to set a fixed price, so you keep the painting for free."
+      : `${seller.name} has no cash available to set a fixed price and keeps the painting for free.`;
     render();
     return setTimeout(resolveAuction, aiDelay(.7));
   }
@@ -990,7 +994,9 @@ function offerDoubleMatch() {
       continue;
     }
     a.matcher = player.id;
-    state.message = `${player.name} may add a matching ${artist(a.card.artist).name} painting—or pass.`;
+    state.message = isLocalPlayer(player)
+      ? `You may add a matching ${artist(a.card.artist).name} painting—or pass.`
+      : `${player.name} may add a matching ${artist(a.card.artist).name} painting—or pass.`;
     render();
     if (isComputer(player) && networkMode !== "guest") {
       const match = matches[Math.floor(Math.random() * matches.length)];
@@ -1054,7 +1060,7 @@ function resolveAuction() {
   if (a.bidder === null) {
     seller.collection.push(...a.cards);
     seller.status = `Kept ${artist(a.card.artist).name} for free`;
-    auctionResult(`No sale — ${seller.name} keeps ${a.cards.length > 1 ? `both ${artist(a.card.artist).name} paintings` : `the ${artist(a.card.artist).name}`}.`, seller.id, "pass");
+    auctionResult(`No sale — ${isLocalPlayer(seller) ? "you keep" : `${seller.name} keeps`} ${a.cards.length > 1 ? `both ${artist(a.card.artist).name} paintings` : `the ${artist(a.card.artist).name}`}.`, seller.id, "pass");
     state.history.push({ kind: "auction", round: state.round, artist: a.card.artist, auctionType: a.originalType, seller: seller.name, buyer: seller.name, price: 0, quantity: a.cards.length });
   } else {
     const buyer = state.players[a.bidder];
@@ -1103,7 +1109,9 @@ function endRound(triggerCard) {
     state.phase = "gameover";
     const standings = [...state.players].sort((a,b) => b.cash - a.cash);
     const winner = standings[0];
-    state.message = `Game over — ${winner.name} wins with ${money(winner.cash)}. ${summary}`;
+    state.message = isLocalPlayer(winner)
+      ? `Game over — you win with ${money(winner.cash)}. ${summary}`
+      : `Game over — ${winner.name} wins with ${money(winner.cash)}. ${summary}`;
     state.auction = null;
     state.roundPresentation = {
       ...presentation,
@@ -1120,7 +1128,7 @@ function endRound(triggerCard) {
   deal(roundDealCount());
   state.turn = (state.turn + 1) % state.players.length;
   state.phase = "choose";
-  state.message = `Round scored: ${summary}. ${current().name} opens round ${state.round}.`;
+  state.message = `Round scored: ${summary}. ${isLocalPlayer(current()) ? "You open" : `${current().name} opens`} round ${state.round}.`;
   state.roundPresentation = presentation;
   render();
 }
@@ -1197,7 +1205,9 @@ function renderRoundResults() {
   const result = state.roundPresentation;
   const dialog = $("#round-results-dialog");
   if (!result || dialog.open) return;
-  $("#round-results-title").textContent = result.gameover ? `${result.winner} wins the game!` : `Round ${result.round} results`;
+  $("#round-results-title").textContent = result.gameover
+    ? (result.winner === localPlayer().name ? "You win the game!" : `${result.winner} wins the game!`)
+    : `Round ${result.round} results`;
   $("#round-podium").innerHTML = result.leaders.map((item, index) => {
     const ar = artist(item.artist);
     return `<div class="podium-place" style="--art:url('${ar.image}')">
