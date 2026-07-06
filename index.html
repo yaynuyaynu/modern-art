@@ -142,7 +142,8 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 .avatar-wrap.mood-thinking { filter: none; opacity: 1; animation: thinking-wobble 1.1s ease-in-out infinite alternate; }
 .avatar-wrap.mood-passing { filter: grayscale(.2); opacity: .9; animation: sad-sink .45s ease-out both; }
 .family-avatar { position: relative; display: block; flex: 0 0 68px; width: 68px; min-width: 68px; height: 68px; aspect-ratio: 1 / 1; border-radius: 50%; border: 3px solid white; background-position: center 18%; background-size: cover; box-shadow: 0 3px 10px rgba(0,0,0,.18); transition: .2s; overflow: hidden; }
-.cartoon-avatar { --toon-bg:#dce8de; --toon-skin:#e7b96f; --toon-hair:#3b2b25; --toon-accent:#28736d; background: var(--toon-bg); isolation: isolate; }
+.cartoon-avatar { --toon-bg:#dce8de; --toon-skin:#e7b96f; --toon-hair:#3b2b25; --toon-accent:#28736d; background:radial-gradient(circle at 50% 38%,color-mix(in srgb,var(--toon-bg),white 25%),var(--toon-bg) 70%); isolation:isolate; }
+.cartoon-avatar::after { content:""; position:absolute; z-index:1; left:13px; bottom:-12px; width:42px; height:27px; border:2px solid #302b27; border-radius:45% 45% 0 0; background:linear-gradient(90deg,var(--toon-accent),color-mix(in srgb,var(--toon-accent),white 28%),var(--toon-accent)); }
 .cartoon-avatar .toon-face { position:absolute; z-index:2; left:15px; top:13px; width:38px; height:45px; border:2px solid #3a3028; border-radius:45% 45% 48% 48%; background:var(--toon-skin); box-shadow:inset 0 -5px color-mix(in srgb, var(--toon-skin), #9b5d39 20%); }
 .toon-hair { position:absolute; z-index:4; left:12px; top:5px; width:44px; height:22px; border:2px solid #302822; border-radius:65% 45% 25% 25%; background:var(--toon-hair); transform:rotate(-5deg); }
 .toon-ear { position:absolute; z-index:1; top:28px; width:12px; height:17px; border:2px solid #3a3028; border-radius:50%; background:var(--toon-accent); }
@@ -169,10 +170,11 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 .family-becky .toon-hair { left:8px; top:4px; width:52px; height:55px; border-radius:55% 55% 40% 40%; }
 .family-becky .toon-face { z-index:5; }
 .family-becky .toon-eye { height:9px; border-color:#4a2b24; }
-.family-dad { --toon-bg:#c9d4b6; --toon-skin:#e0b57d; --toon-hair:#85817b; --toon-accent:#b85d42; }
-.family-dad .toon-hair { top:7px; height:16px; background:linear-gradient(90deg,#85817b 0 30%,#d1cbc0 31% 50%,#85817b 51%); }
+.family-dad { --toon-bg:#c9d4b6; --toon-skin:#e0b57d; --toon-hair:#332821; --toon-accent:#b85d42; }
+.family-dad .toon-hair { top:7px; height:17px; background:linear-gradient(135deg,#171615,#4a372c 48%,#241d19); transform:rotate(0); }
 .family-dad .toon-face { border-radius:42%; }
-.family-dad .toon-brow { background:#77726c; }
+.family-dad .toon-brow { background:#332821; }
+.family-dad .toon-glasses { border-color:#8f4d39; background:linear-gradient(90deg,transparent 44%,#8f4d39 45% 55%,transparent 56%); }
 .family-carol { --toon-bg:#f2d7a7; --toon-skin:#e2b27a; --toon-hair:#b7afa1; --toon-accent:#d36c61; }
 .family-carol .toon-hair { left:8px; top:5px; width:52px; height:30px; border-radius:50%; background:radial-gradient(circle at 20% 40%,#d4cec3 0 6px,transparent 7px),radial-gradient(circle at 48% 22%,#c2baae 0 8px,transparent 9px),radial-gradient(circle at 78% 48%,#aaa397 0 7px,transparent 8px),#b7afa1; }
 .family-carol .toon-face { z-index:5; }
@@ -614,7 +616,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.21.1";
+const VERSION = "0.21.2";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
