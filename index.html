@@ -231,6 +231,12 @@ body.win-celebration::after { content: ""; position: fixed; z-index: 200; inset:
 .multiplayer-actions input { min-width: 0; border: 1px solid var(--line); border-radius: 999px; padding: 0 14px; font: inherit; text-transform: uppercase; }
 .room-status { min-height: 22px; margin-top: 9px; font-size: .82rem; color: var(--muted); overflow-wrap: anywhere; }
 .room-status a { color: #23704d; font-weight: 800; }
+.lobby-panel { margin-top: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); }
+.lobby-heading { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 9px; }
+.lobby-heading span { color: var(--muted); font-size: .8rem; }
+.lobby-players { display: grid; gap: 6px; margin-bottom: 10px; }
+.lobby-player { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: 8px; background: #f1eadc; font-weight: 800; }
+.lobby-player em { color: #23704d; font-size: .7rem; font-style: normal; letter-spacing: .05em; }
 .online-pill { display: inline-block; margin-left: 8px; padding: 3px 7px; border-radius: 999px; color: #23704d; background: #e2f3e8; font: 800 .65rem/1 sans-serif; vertical-align: middle; }
 .darkstaff-mark, .game-footer { color: #7b7062; font: 600 .72rem/1.2 sans-serif; letter-spacing: .08em; text-transform: uppercase; }
 .darkstaff-mark { margin-top: 15px; text-align: center; }
@@ -412,14 +418,19 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
       <p class="setup-note">The first auctioneer is chosen randomly.</p>
       <button id="start-game" class="primary big">Enter the gallery</button>
       <div class="multiplayer-box">
-        <strong>Play with someone online</strong>
-        <p>One person creates a room and sends the link to the other.</p>
+        <strong>Play together online</strong>
+        <p>Create a lobby, invite everyone, then start when the group is ready.</p>
         <div class="multiplayer-actions">
           <button id="host-game" class="quiet">Create a room</button>
           <input id="room-code" aria-label="Room code" placeholder="Room code">
           <button id="join-game" class="quiet">Join room</button>
         </div>
         <div id="room-status" class="room-status"></div>
+        <section id="lobby-panel" class="lobby-panel hidden" aria-live="polite">
+          <div class="lobby-heading"><strong>Room lobby</strong><span id="lobby-count"></span></div>
+          <div id="lobby-players" class="lobby-players"></div>
+          <button id="start-lobby-game" class="primary hidden">Start game</button>
+        </section>
       </div>
       <button id="continue-game" class="quiet big hidden">Continue saved game</button>
       <div class="darkstaff-mark"><span>◆</span> <strong>StrelSoft Software</strong></div>
@@ -516,7 +527,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.15.0";
+const VERSION = "0.16.0";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -620,6 +631,8 @@ let peer = null;
 let hostConnection = null;
 let guestConnections = [];
 let roomId = "";
+let lobbyPlayers = [];
+let lobbyMaxPlayers = 4;
 let seenDealId = "";
 const $ = (s) => document.querySelector(s);
 const money = (n) => `${Math.max(0, Math.round(n))}`;
@@ -681,14 +694,17 @@ function makeDeck() {
 }
 
 function startGame(options = {}) {
-  const count = +$("#player-count").value;
+  const onlinePlayers = options.onlinePlayers || [];
+  const count = Math.max(+$("#player-count").value, onlinePlayers.length + 1);
   const playerName = $("#player-name").value.trim() || "You";
   const humanKey = $("#character-select").value;
   const familyBanter = $("#family-banter").checked;
+  const onlineKeys = new Set(onlinePlayers.map(player => player.characterKey).filter(Boolean));
   const opponents = familyBanter
-    ? shuffle(FAMILY.filter(x => x.key !== humanKey))
+    ? shuffle(FAMILY.filter(x => x.key !== humanKey && !onlineKeys.has(x.key)))
     : shuffle(GENERIC_AI);
-  const roster = [FAMILY.find(x => x.key === humanKey), ...opponents].slice(0, count);
+  const onlineRoster = onlinePlayers.map(player => ({ ...player, key: player.characterKey || null }));
+  const roster = [FAMILY.find(x => x.key === humanKey), ...onlineRoster, ...opponents].slice(0, count);
   state = {
     round: 1, turn: Math.floor(Math.random() * count), phase: "choose", rule: $("#rule-set").value,
     deck: makeDeck(), marketValues: Object.fromEntries(ARTISTS.map(a => [a.id, 0])),
@@ -701,16 +717,11 @@ function startGame(options = {}) {
       id: i, name: i === 0 ? playerName : roster[i].name, characterKey: roster[i].key || null,
       avatar: roster[i].avatar || null,
       botColor: roster[i].botColor || null, nerve: roster[i].nerve || 1,
-      human: i === 0 || (networkMode === "host" && i === 1), online: networkMode === "host" && i < 2,
+      human: i === 0 || i <= onlinePlayers.length, online: networkMode === "host" && i <= onlinePlayers.length,
       cash: 100, hand: [], collection: [], passed: false, status: ""
     }))
   };
   state.startingPlayerId = state.turn;
-  if (networkMode === "host") {
-    state.players[0].name = playerName;
-    state.players[1].name = options.guestName || "Guest";
-    state.players[1].avatar = null;
-  }
   deal(roundDealCount());
   const starter = current();
   state.message = isLocalPlayer(starter)
@@ -1527,10 +1538,29 @@ function makeRoomCode() {
 function setRoomStatus(html) {
   $("#room-status").innerHTML = html;
 }
+function renderLobby(players = lobbyPlayers, maxPlayers = lobbyMaxPlayers, isHost = networkMode === "host") {
+  $("#lobby-panel").classList.remove("hidden");
+  $("#lobby-count").textContent = `${players.length} of ${maxPlayers} seats joined`;
+  $("#lobby-players").innerHTML = players.map((player, index) =>
+    `<div class="lobby-player"><span>${index + 1}. ${player.name}</span><em>${index === 0 ? "HOST" : "READY"}</em></div>`
+  ).join("");
+  $("#start-lobby-game").classList.toggle("hidden", !isHost);
+  $("#start-lobby-game").disabled = !isHost || players.length < 2;
+}
+function broadcastLobby() {
+  const players = lobbyPlayers.map(({ name, characterKey }) => ({ name, characterKey }));
+  guestConnections.filter(connection => connection.open && connection.lobbyJoined).forEach(connection => {
+    connection.send({ type: "lobby", players, maxPlayers: lobbyMaxPlayers, seat: connection.seat, room: roomCodeFromId(roomId) });
+  });
+  renderLobby();
+}
 function createRoom() {
   if (typeof Peer === "undefined") return setRoomStatus("Online play could not load. Check your connection and refresh.");
   networkMode = "host";
   localPlayerId = 0;
+  lobbyMaxPlayers = +$("#player-count").value;
+  lobbyPlayers = [{ name: $("#player-name").value.trim() || "Host", characterKey: $("#character-select").value }];
+  guestConnections = [];
   const code = makeRoomCode();
   roomId = peerIdFromCode(code);
   setRoomStatus("Creating your room…");
@@ -1539,30 +1569,24 @@ function createRoom() {
     const link = `${location.origin}${location.pathname}?room=${code}`;
     setRoomStatus(`Room <strong>${code}</strong> is ready. <a href="${link}">Copy or send this link</a>. Waiting for Greg…`);
     $("#room-code").value = code;
-    startGame();
+    renderLobby();
   });
   peer.on("connection", connection => {
-    if (guestConnections.length) {
-      connection.on("open", () => connection.send({ type: "error", message: "This room already has two human players." }));
+    if (state || lobbyPlayers.length >= lobbyMaxPlayers) {
+      connection.on("open", () => connection.send({ type: "error", message: state ? "This game has already started." : "This lobby is full." }));
       return;
     }
     guestConnections.push(connection);
     connection.on("data", message => handleHostMessage(connection, message));
-    connection.on("open", () => {
-      if (state) {
-        state.players[1].name = "Guest";
-        state.players[1].online = true;
-        state.players[1].human = true;
-        connection.send({ type: "state", state, seat: 1, room: code });
-        render();
-        toast("A guest connected.");
-      }
-    });
     connection.on("close", () => {
       guestConnections = guestConnections.filter(c => c !== connection);
-      if (state?.players?.[1]) {
-        state.players[1].online = false;
-        state.players[1].status = "Disconnected";
+      if (!state) {
+        lobbyPlayers = [lobbyPlayers[0], ...guestConnections.filter(c => c.lobbyJoined).map(c => c.lobbyPlayer)];
+        guestConnections.filter(c => c.lobbyJoined).forEach((c, index) => { c.seat = index + 1; });
+        broadcastLobby();
+      } else if (state.players[connection.seat]) {
+        state.players[connection.seat].online = false;
+        state.players[connection.seat].status = "Disconnected";
         render();
       }
     });
@@ -1595,6 +1619,13 @@ function joinRoom() {
 }
 function handleGuestMessage(message) {
   if (message?.type === "error") return setRoomStatus(message.message);
+  if (message?.type === "lobby") {
+    localPlayerId = message.seat;
+    lobbyPlayers = message.players || [];
+    lobbyMaxPlayers = message.maxPlayers || 4;
+    setRoomStatus(`Joined room <strong>${message.room}</strong>. Waiting for the host to start.`);
+    return renderLobby(lobbyPlayers, lobbyMaxPlayers, false);
+  }
   if (message?.type === "notice") {
     if (message.duration === 5000) return roundResult(message.text);
     return showAuctionResult(message.text, message.playerId);
@@ -1611,18 +1642,23 @@ function sendAction(action, payload = {}) {
   hostConnection.send({ type: "action", action, payload });
 }
 function handleHostMessage(connection, message) {
-  if (!state) return;
-  const playerId = 1;
-  const p = state.players[playerId];
   if (message?.type === "hello") {
-    p.name = String(message.name || "Guest").trim().slice(0, 20) || "Guest";
-    p.characterKey = FAMILY.some(x => x.key === message.characterKey) ? message.characterKey : null;
-    p.avatar = null;
-    p.online = true;
-    connection.send({ type: "state", state, seat: 1, room: roomCodeFromId(roomId) });
-    render();
-    return toast(`${p.name} joined the table.`);
+    if (state) return connection.send({ type: "error", message: "This game has already started." });
+    if (connection.lobbyJoined) return broadcastLobby();
+    if (lobbyPlayers.length >= lobbyMaxPlayers) return connection.send({ type: "error", message: "This lobby is full." });
+    connection.seat = lobbyPlayers.length;
+    connection.lobbyJoined = true;
+    connection.lobbyPlayer = {
+      name: String(message.name || "Guest").trim().slice(0, 20) || "Guest",
+      characterKey: FAMILY.some(x => x.key === message.characterKey) ? message.characterKey : null
+    };
+    lobbyPlayers.push(connection.lobbyPlayer);
+    broadcastLobby();
+    return toast(`${connection.lobbyPlayer.name} joined the lobby.`);
   }
+  if (!state || !connection.lobbyJoined) return;
+  const playerId = connection.seat;
+  const p = state.players[playerId];
   if (message?.type !== "action") return;
   const { action, payload = {} } = message;
   if (action === "play" && state.phase === "choose" && state.turn === playerId) launchCard(p, payload.cardId);
@@ -1642,13 +1678,20 @@ function handleHostMessage(connection, message) {
   else if (action === "doublePass" && state.phase === "double" && state.auction?.matcher === playerId) passDoubleFor(playerId);
 }
 function broadcastState() {
-  const packet = { type: "state", state, seat: 1, room: roomCodeFromId(roomId) };
-  guestConnections.filter(c => c.open).forEach(c => c.send(packet));
+  guestConnections.filter(c => c.open && c.lobbyJoined).forEach(connection => {
+    connection.send({ type: "state", state, seat: connection.seat, room: roomCodeFromId(roomId) });
+  });
+}
+function startLobbyGame() {
+  if (networkMode !== "host" || lobbyPlayers.length < 2) return;
+  $("#player-count").value = String(lobbyMaxPlayers);
+  startGame({ onlinePlayers: lobbyPlayers.slice(1) });
 }
 
 $("#start-game").onclick = startGame;
 $("#host-game").onclick = createRoom;
 $("#join-game").onclick = joinRoom;
+$("#start-lobby-game").onclick = startLobbyGame;
 $("#new-game").onclick = () => { localStorage.removeItem("gallery-auction-save-v2"); location.reload(); };
 $("#continue-game").onclick = () => {
   state = JSON.parse(localStorage.getItem("gallery-auction-save-v2"));
