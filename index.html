@@ -237,6 +237,10 @@ body.win-celebration::after { content: ""; position: fixed; z-index: 200; inset:
 .lobby-players { display: grid; gap: 6px; margin-bottom: 10px; }
 .lobby-player { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: 8px; background: #f1eadc; font-weight: 800; }
 .lobby-player em { color: #23704d; font-size: .7rem; font-style: normal; letter-spacing: .05em; }
+.lobby-player > div { display: flex; align-items: center; gap: 8px; }
+.lobby-player .seat-toggle { padding: 6px 9px; font-size: .7rem; }
+.lobby-open { outline: 2px dashed #d5aa62; outline-offset: -2px; background: #fff8e8; }
+.lobby-bot { background: #eceae5; }
 .lobby-note { margin: 2px 0 10px; color: var(--muted); font-size: .78rem; }
 #copy-room-link { margin-top: 9px; }
 .online-pill { display: inline-block; margin-left: 8px; padding: 3px 7px; border-radius: 999px; color: #23704d; background: #e2f3e8; font: 800 .65rem/1 sans-serif; vertical-align: middle; }
@@ -464,7 +468,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
         <section id="lobby-panel" class="lobby-panel hidden" aria-live="polite">
           <div class="lobby-heading"><strong>Room lobby</strong><span id="lobby-count"></span></div>
           <div id="lobby-players" class="lobby-players"></div>
-          <p class="lobby-note">Keep this page open while everyone joins.</p>
+          <p class="lobby-note">Open friend seats accept invitations. Switch unused seats to computers, then start when everyone is ready. Keep this page open.</p>
           <button id="start-lobby-game" class="primary hidden">Start game</button>
         </section>
       </div>
@@ -566,7 +570,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.18.1";
+const VERSION = "0.19.0";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -672,6 +676,7 @@ let guestConnections = [];
 let roomId = "";
 let lobbyPlayers = [];
 let lobbyMaxPlayers = 4;
+let lobbySeats = [];
 let roomInviteLink = "";
 let seenDealId = "";
 const $ = (s) => document.querySelector(s);
@@ -734,8 +739,11 @@ function makeDeck() {
 }
 
 function startGame(options = {}) {
-  const onlinePlayers = options.onlinePlayers || [];
-  const count = Math.max(+$("#player-count").value, onlinePlayers.length + 1);
+  const configuredSeats = options.lobbySeats || null;
+  const onlinePlayers = configuredSeats
+    ? configuredSeats.filter((seat, index) => index > 0 && seat.type === "human").map(seat => seat.player)
+    : (options.onlinePlayers || []);
+  const count = configuredSeats?.length || Math.max(+$("#player-count").value, onlinePlayers.length + 1);
   const playerName = $("#player-name").value.trim() || "You";
   const humanKey = $("#character-select").value;
   const familyBanter = $("#family-banter").checked;
@@ -743,8 +751,15 @@ function startGame(options = {}) {
   const opponents = familyBanter
     ? shuffle(FAMILY.filter(x => x.key !== humanKey && !onlineKeys.has(x.key)))
     : shuffle(GENERIC_AI);
-  const onlineRoster = onlinePlayers.map(player => ({ ...player, key: player.characterKey || null }));
-  const roster = [FAMILY.find(x => x.key === humanKey), ...onlineRoster, ...opponents].slice(0, count);
+  const onlineRoster = onlinePlayers.map(player => ({ ...player, key: player.characterKey || null, human: true }));
+  const host = FAMILY.find(x => x.key === humanKey);
+  const roster = configuredSeats
+    ? [host, ...configuredSeats.slice(1).map(seat =>
+        seat.type === "human"
+          ? { ...seat.player, key: seat.player.characterKey || null, human: true }
+          : opponents.shift()
+      )]
+    : [host, ...onlineRoster, ...opponents].slice(0, count);
   state = {
     round: 1, turn: Math.floor(Math.random() * count), phase: "choose", rule: $("#rule-set").value,
     deck: makeDeck(), marketValues: Object.fromEntries(ARTISTS.map(a => [a.id, 0])),
@@ -757,7 +772,7 @@ function startGame(options = {}) {
       id: i, name: i === 0 ? playerName : roster[i].name, characterKey: roster[i].key || null,
       avatar: roster[i].avatar || null,
       botColor: roster[i].botColor || null, nerve: roster[i].nerve || 1,
-      human: i === 0 || i <= onlinePlayers.length, online: networkMode === "host" && i <= onlinePlayers.length,
+      human: i === 0 || !!roster[i].human, online: networkMode === "host" && (i === 0 || !!roster[i].human),
       cash: 100, hand: [], collection: [], passed: false, status: ""
     }))
   };
@@ -1655,21 +1670,42 @@ function makeRoomCode() {
 function setRoomStatus(html) {
   $("#room-status").innerHTML = html;
 }
-function renderLobby(players = lobbyPlayers, maxPlayers = lobbyMaxPlayers, isHost = networkMode === "host") {
+function renderLobby(seats = lobbySeats, isHost = networkMode === "host") {
   $("#lobby-panel").classList.remove("hidden");
-  $("#lobby-count").textContent = `${players.length} of ${maxPlayers} seats joined`;
-  $("#lobby-players").innerHTML = players.map((player, index) =>
-    `<div class="lobby-player"><span>${index + 1}. ${player.name}</span><em>${index === 0 ? "HOST" : "READY"}</em></div>`
-  ).join("");
+  const humanCount = seats.filter(seat => seat.type === "human").length;
+  const botCount = seats.filter(seat => seat.type === "bot").length;
+  const openCount = seats.filter(seat => seat.type === "open").length;
+  $("#lobby-count").textContent = `${humanCount} joined · ${botCount} computer${botCount === 1 ? "" : "s"} · ${openCount} waiting`;
+  $("#lobby-players").innerHTML = seats.map((seat, index) => {
+    const name = seat.type === "human" ? seat.player.name : seat.type === "bot" ? "Computer player" : "Waiting for a friend";
+    const badge = index === 0 ? "HOST" : seat.type === "human" ? "READY" : seat.type === "bot" ? "COMPUTER" : "OPEN";
+    const control = isHost && index > 0 && seat.type !== "human"
+      ? `<button class="quiet seat-toggle" data-seat="${index}">${seat.type === "open" ? "Use computer" : "Open to friend"}</button>`
+      : "";
+    return `<div class="lobby-player lobby-${seat.type}"><span><b>${index + 1}.</b> ${name}</span><div><em>${badge}</em>${control}</div></div>`;
+  }).join("");
+  if (isHost) {
+    $("#lobby-players").querySelectorAll(".seat-toggle").forEach(button => {
+      button.onclick = () => toggleLobbySeat(+button.dataset.seat);
+    });
+  }
   $("#start-lobby-game").classList.toggle("hidden", !isHost);
-  $("#start-lobby-game").disabled = !isHost || players.length < 2;
+  $("#start-lobby-game").disabled = !isHost || humanCount < 2 || openCount > 0;
 }
 function broadcastLobby() {
-  const players = lobbyPlayers.map(({ name, characterKey }) => ({ name, characterKey }));
+  const seats = lobbySeats.map(seat => ({
+    type: seat.type,
+    player: seat.player ? { name: seat.player.name, characterKey: seat.player.characterKey } : null
+  }));
   guestConnections.filter(connection => connection.open && connection.lobbyJoined).forEach(connection => {
-    connection.send({ type: "lobby", players, maxPlayers: lobbyMaxPlayers, seat: connection.seat, room: roomCodeFromId(roomId) });
+    connection.send({ type: "lobby", seats, maxPlayers: lobbyMaxPlayers, seat: connection.seat, room: roomCodeFromId(roomId) });
   });
   renderLobby();
+}
+function toggleLobbySeat(index) {
+  if (networkMode !== "host" || !lobbySeats[index] || lobbySeats[index].type === "human") return;
+  lobbySeats[index] = { type: lobbySeats[index].type === "open" ? "bot" : "open" };
+  broadcastLobby();
 }
 function createRoom() {
   if (typeof Peer === "undefined") return setRoomStatus("Online play could not load. Check your connection and refresh.");
@@ -1677,6 +1713,13 @@ function createRoom() {
   localPlayerId = 0;
   lobbyMaxPlayers = +$("#player-count").value;
   lobbyPlayers = [{ name: $("#player-name").value.trim() || "Host", characterKey: $("#character-select").value }];
+  lobbySeats = Array.from({ length: lobbyMaxPlayers }, (_, index) =>
+    index === 0
+      ? { type: "human", player: lobbyPlayers[0] }
+      : index === 1
+        ? { type: "open" }
+        : { type: "bot" }
+  );
   guestConnections = [];
   const requestedCode = $("#room-code").value.trim().toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 12);
   const code = requestedCode || makeRoomCode();
@@ -1692,7 +1735,7 @@ function createRoom() {
     renderLobby();
   });
   peer.on("connection", connection => {
-    if (state || lobbyPlayers.length >= lobbyMaxPlayers) {
+    if (state || !lobbySeats.some(seat => seat.type === "open")) {
       connection.on("open", () => connection.send({ type: "error", message: state ? "This game has already started." : "This lobby is full." }));
       return;
     }
@@ -1701,8 +1744,7 @@ function createRoom() {
     connection.on("close", () => {
       guestConnections = guestConnections.filter(c => c !== connection);
       if (!state) {
-        lobbyPlayers = [lobbyPlayers[0], ...guestConnections.filter(c => c.lobbyJoined).map(c => c.lobbyPlayer)];
-        guestConnections.filter(c => c.lobbyJoined).forEach((c, index) => { c.seat = index + 1; });
+        if (connection.lobbyJoined && lobbySeats[connection.seat]) lobbySeats[connection.seat] = { type: "open" };
         broadcastLobby();
       } else if (state.players[connection.seat]) {
         state.players[connection.seat].online = false;
@@ -1749,10 +1791,10 @@ function handleGuestMessage(message) {
   if (message?.type === "error") return setRoomStatus(message.message);
   if (message?.type === "lobby") {
     localPlayerId = message.seat;
-    lobbyPlayers = message.players || [];
+    lobbySeats = message.seats || [];
     lobbyMaxPlayers = message.maxPlayers || 4;
     setRoomStatus(`Joined room <strong>${message.room}</strong>. Waiting for the host to start.`);
-    return renderLobby(lobbyPlayers, lobbyMaxPlayers, false);
+    return renderLobby(lobbySeats, false);
   }
   if (message?.type === "notice") {
     if (message.duration === 5000) return roundResult(message.text);
@@ -1773,14 +1815,15 @@ function handleHostMessage(connection, message) {
   if (message?.type === "hello") {
     if (state) return connection.send({ type: "error", message: "This game has already started." });
     if (connection.lobbyJoined) return broadcastLobby();
-    if (lobbyPlayers.length >= lobbyMaxPlayers) return connection.send({ type: "error", message: "This lobby is full." });
-    connection.seat = lobbyPlayers.length;
+    const openSeat = lobbySeats.findIndex(seat => seat.type === "open");
+    if (openSeat < 0) return connection.send({ type: "error", message: "This lobby has no open friend seats." });
+    connection.seat = openSeat;
     connection.lobbyJoined = true;
     connection.lobbyPlayer = {
       name: String(message.name || "Guest").trim().slice(0, 20) || "Guest",
       characterKey: FAMILY.some(x => x.key === message.characterKey) ? message.characterKey : null
     };
-    lobbyPlayers.push(connection.lobbyPlayer);
+    lobbySeats[openSeat] = { type: "human", player: connection.lobbyPlayer };
     broadcastLobby();
     return toast(`${connection.lobbyPlayer.name} joined the lobby.`);
   }
@@ -1811,9 +1854,10 @@ function broadcastState() {
   });
 }
 function startLobbyGame() {
-  if (networkMode !== "host" || lobbyPlayers.length < 2) return;
+  const humanCount = lobbySeats.filter(seat => seat.type === "human").length;
+  if (networkMode !== "host" || humanCount < 2 || lobbySeats.some(seat => seat.type === "open")) return;
   $("#player-count").value = String(lobbyMaxPlayers);
-  startGame({ onlinePlayers: lobbyPlayers.slice(1) });
+  startGame({ lobbySeats });
 }
 
 $("#start-game").onclick = startGame;
