@@ -238,9 +238,19 @@ body.win-celebration::after { content: ""; position: fixed; z-index: 200; inset:
 .lobby-player { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: 8px; background: #f1eadc; font-weight: 800; }
 .lobby-player em { color: #23704d; font-size: .7rem; font-style: normal; letter-spacing: .05em; }
 .lobby-player > div { display: flex; align-items: center; gap: 8px; }
-.lobby-player .seat-toggle { padding: 6px 9px; font-size: .7rem; }
+.lobby-player.lobby-open, .lobby-player.lobby-bot { align-items: stretch; justify-content: flex-start; gap: 10px; }
 .lobby-open { outline: 2px dashed #d5aa62; outline-offset: -2px; background: #fff8e8; }
 .lobby-bot { background: #eceae5; }
+.seat-number { width: 27px; height: 27px; display: grid; place-items: center; flex: 0 0 27px; align-self: center; border-radius: 50%; background: var(--ink); color: white; }
+.lobby-player .seat-configuration { min-width: 0; display: grid; grid-template-columns: 145px 1fr; align-items: center; gap: 10px; flex: 1; }
+.seat-mode { min-height: 64px; display: grid; place-items: center; gap: 2px; padding: 7px 12px; border: 2px solid var(--line); border-radius: 11px; background: white; color: var(--ink); cursor: pointer; }
+.seat-mode span { font-size: 1.45rem; line-height: 1; }
+.seat-mode strong { font-size: .76rem; }
+.seat-mode.bot { border-color: #7aa98b; background: #e6f2e9; }
+.seat-mode.open { border-style: dashed; border-color: #d5a34e; background: #fffaf0; }
+.bot-seat-options { display: grid !important; grid-template-columns: 1fr 1fr; gap: 8px !important; min-width: 0; }
+.bot-seat-options label { min-width: 0; color: var(--muted); font-size: .65rem; font-weight: 800; }
+.bot-seat-options select { width: 100%; min-width: 0; margin-top: 3px; padding: 7px 8px; border: 1px solid var(--line); border-radius: 7px; background: white; color: var(--ink); font: inherit; }
 .lobby-note { margin: 2px 0 10px; color: var(--muted); font-size: .78rem; }
 #copy-room-link { margin-top: 9px; }
 .online-pill { display: inline-block; margin-left: 8px; padding: 3px 7px; border-radius: 999px; color: #23704d; background: #e2f3e8; font: 800 .65rem/1 sans-serif; vertical-align: middle; }
@@ -256,6 +266,8 @@ body.win-celebration::after { content: ""; position: fixed; z-index: 200; inset:
 @media (max-width: 620px) {
   .multiplayer-actions { grid-template-columns: 1fr 1fr; }
   .multiplayer-actions input { grid-column: 1 / -1; grid-row: 1; min-height: 42px; }
+  .lobby-player .seat-configuration { grid-template-columns: 105px 1fr; }
+  .bot-seat-options { grid-template-columns: 1fr !important; }
 }
 .value-forecast > p:not(.eyebrow) { color: var(--muted); font-size: .78rem; }
 .possible-values { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 16px 0 9px; }
@@ -570,7 +582,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.19.3";
+const VERSION = "0.20.0";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -602,6 +614,15 @@ const GENERIC_AI = [
   { name: "Suki", botColor: "#d05b77", nerve: 1.04 },
   { name: "Mateo", botColor: "#bf6a2f", nerve: .92 },
   { name: "Iris", botColor: "#3677ad", nerve: 1.12 }
+];
+const BOT_DIFFICULTY = {
+  "Relaxed": .84,
+  "Gallery savvy": 1,
+  "Cutthroat": 1.16
+};
+const BOT_PERSONAS = [
+  ...FAMILY.map(person => ({ value: `family:${person.key}`, label: `${person.name} robot` })),
+  ...GENERIC_AI.map(person => ({ value: `generic:${person.name}`, label: person.name }))
 ];
 const FAMILY_QUOTES = {
   fred: {
@@ -739,6 +760,17 @@ function makeDeck() {
   ));
 }
 
+function botFromSeat(seat, fallback) {
+  const [kind, id] = String(seat.persona || "").split(":");
+  const selected = kind === "family"
+    ? FAMILY.find(person => person.key === id)
+    : GENERIC_AI.find(person => person.name === id);
+  const bot = { ...(selected || fallback || GENERIC_AI[0]) };
+  bot.nerve = (bot.nerve || 1) * (BOT_DIFFICULTY[seat.difficulty] || 1);
+  bot.difficulty = seat.difficulty || "Gallery savvy";
+  return bot;
+}
+
 function startGame(options = {}) {
   const configuredSeats = options.lobbySeats || null;
   const onlinePlayers = configuredSeats
@@ -758,7 +790,7 @@ function startGame(options = {}) {
     ? [host, ...configuredSeats.slice(1).map(seat =>
         seat.type === "human"
           ? { ...seat.player, key: seat.player.characterKey || null, human: true }
-          : opponents.shift()
+          : botFromSeat(seat, opponents.shift())
       )]
     : [host, ...onlineRoster, ...opponents].slice(0, count);
   state = {
@@ -1678,25 +1710,42 @@ function renderLobby(seats = lobbySeats, isHost = networkMode === "host") {
   const openCount = seats.filter(seat => seat.type === "open").length;
   $("#lobby-count").textContent = `${humanCount} joined · ${botCount} computer${botCount === 1 ? "" : "s"} · ${openCount} waiting`;
   $("#lobby-players").innerHTML = seats.map((seat, index) => {
-    const name = seat.type === "human" ? seat.player.name : seat.type === "bot" ? "Computer player" : "Waiting for a friend";
-    const badge = index === 0 ? "HOST" : seat.type === "human" ? "READY" : seat.type === "bot" ? "COMPUTER" : "OPEN";
-    const control = isHost && index > 0 && seat.type !== "human"
-      ? `<button class="quiet seat-toggle" data-seat="${index}">${seat.type === "open" ? "Use computer" : "Open to friend"}</button>`
-      : "";
-    return `<div class="lobby-player lobby-${seat.type}"><span><b>${index + 1}.</b> ${name}</span><div><em>${badge}</em>${control}</div></div>`;
+    if (seat.type === "human") {
+      return `<div class="lobby-player lobby-human"><span><b>${index + 1}.</b> ${seat.player.name}</span><em>${index === 0 ? "HOST" : "READY"}</em></div>`;
+    }
+    const mode = `<button class="seat-mode ${seat.type}" data-seat="${index}" aria-pressed="${seat.type === "bot"}" ${isHost ? "" : "disabled"}>
+      <span>${seat.type === "bot" ? "🤖" : "👤"}</span><strong>${seat.type === "bot" ? "Computer" : "Open for friend"}</strong>
+    </button>`;
+    const botOptions = seat.type === "bot" ? `<div class="bot-seat-options">
+      <label>Persona<select class="seat-persona" data-seat="${index}" ${isHost ? "" : "disabled"}>${BOT_PERSONAS.map(persona =>
+        `<option value="${persona.value}" ${persona.value === seat.persona ? "selected" : ""}>${persona.label}</option>`
+      ).join("")}</select></label>
+      <label>Difficulty<select class="seat-difficulty" data-seat="${index}" ${isHost ? "" : "disabled"}>${Object.keys(BOT_DIFFICULTY).map(level =>
+        `<option ${level === seat.difficulty ? "selected" : ""}>${level}</option>`
+      ).join("")}</select></label>
+    </div>` : "";
+    return `<div class="lobby-player lobby-${seat.type}"><b class="seat-number">${index + 1}</b><div class="seat-configuration">${mode}${botOptions}</div></div>`;
   }).join("");
   if (isHost) {
-    $("#lobby-players").querySelectorAll(".seat-toggle").forEach(button => {
+    $("#lobby-players").querySelectorAll(".seat-mode").forEach(button => {
       button.onclick = () => toggleLobbySeat(+button.dataset.seat);
+    });
+    $("#lobby-players").querySelectorAll(".seat-persona").forEach(select => {
+      select.onchange = () => updateLobbyBot(+select.dataset.seat, "persona", select.value);
+    });
+    $("#lobby-players").querySelectorAll(".seat-difficulty").forEach(select => {
+      select.onchange = () => updateLobbyBot(+select.dataset.seat, "difficulty", select.value);
     });
   }
   $("#start-lobby-game").classList.toggle("hidden", !isHost);
-  $("#start-lobby-game").disabled = !isHost || humanCount < 2 || openCount > 0;
+  $("#start-lobby-game").disabled = !isHost || openCount > 0;
 }
 function broadcastLobby() {
   const seats = lobbySeats.map(seat => ({
     type: seat.type,
-    player: seat.player ? { name: seat.player.name, characterKey: seat.player.characterKey } : null
+    player: seat.player ? { name: seat.player.name, characterKey: seat.player.characterKey } : null,
+    persona: seat.persona || null,
+    difficulty: seat.difficulty || null
   }));
   guestConnections.filter(connection => connection.open && connection.lobbyJoined).forEach(connection => {
     connection.send({ type: "lobby", seats, maxPlayers: lobbyMaxPlayers, seat: connection.seat, room: roomCodeFromId(roomId) });
@@ -1705,7 +1754,14 @@ function broadcastLobby() {
 }
 function toggleLobbySeat(index) {
   if (networkMode !== "host" || !lobbySeats[index] || lobbySeats[index].type === "human") return;
-  lobbySeats[index] = { type: lobbySeats[index].type === "open" ? "bot" : "open" };
+  lobbySeats[index] = lobbySeats[index].type === "open"
+    ? { type: "bot", persona: `generic:${GENERIC_AI[index % GENERIC_AI.length].name}`, difficulty: "Gallery savvy" }
+    : { type: "open" };
+  broadcastLobby();
+}
+function updateLobbyBot(index, field, value) {
+  if (networkMode !== "host" || lobbySeats[index]?.type !== "bot") return;
+  lobbySeats[index][field] = value;
   broadcastLobby();
 }
 function createRoom() {
@@ -1719,7 +1775,7 @@ function createRoom() {
       ? { type: "human", player: lobbyPlayers[0] }
       : index === 1
         ? { type: "open" }
-        : { type: "bot" }
+        : { type: "bot", persona: `generic:${GENERIC_AI[index % GENERIC_AI.length].name}`, difficulty: $("#difficulty").value }
   );
   guestConnections = [];
   const requestedCode = $("#room-code").value.trim().toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 12);
@@ -1890,8 +1946,7 @@ function broadcastState() {
   });
 }
 function startLobbyGame() {
-  const humanCount = lobbySeats.filter(seat => seat.type === "human").length;
-  if (networkMode !== "host" || humanCount < 2 || lobbySeats.some(seat => seat.type === "open")) return;
+  if (networkMode !== "host" || lobbySeats.some(seat => seat.type === "open")) return;
   $("#player-count").value = String(lobbyMaxPlayers);
   startGame({ lobbySeats });
 }
