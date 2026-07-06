@@ -570,7 +570,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.19.2";
+const VERSION = "0.19.3";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -678,6 +678,7 @@ let lobbyPlayers = [];
 let lobbyMaxPlayers = 4;
 let lobbySeats = [];
 let roomInviteLink = "";
+let joiningRoom = false;
 let seenDealId = "";
 const $ = (s) => document.querySelector(s);
 const money = (n) => `${Math.max(0, Math.round(n))}`;
@@ -1763,8 +1764,14 @@ function createRoom() {
 }
 function joinRoom() {
   if (typeof Peer === "undefined") return setRoomStatus("Online play could not load. Check your connection and refresh.");
+  if (joiningRoom || hostConnection?.open) return;
   const code = $("#room-code").value.trim();
   if (!code) return setRoomStatus("Enter the room code the host sent you.");
+  joiningRoom = true;
+  $("#join-game").disabled = true;
+  $("#join-game").textContent = "Joining…";
+  $("#host-game").disabled = true;
+  $("#room-code").disabled = true;
   networkMode = "guest";
   localPlayerId = 1;
   setRoomStatus("Joining the room…");
@@ -1780,17 +1787,46 @@ function joinRoom() {
       });
     });
     hostConnection.on("data", handleGuestMessage);
-    hostConnection.on("close", () => toast("The host disconnected."));
-    hostConnection.on("error", () => setRoomStatus("Room not found. Ask the host to keep the lobby page open and recheck the code."));
+    hostConnection.on("close", () => {
+      joiningRoom = false;
+      $("#join-game").disabled = false;
+      $("#join-game").textContent = "Join room";
+      $("#room-code").disabled = false;
+      toast("The host disconnected.");
+    });
+    hostConnection.on("error", () => {
+      joiningRoom = false;
+      $("#join-game").disabled = false;
+      $("#join-game").textContent = "Join room";
+      $("#room-code").disabled = false;
+      setRoomStatus("Room not found. Ask the host to keep the lobby page open and recheck the code.");
+    });
   });
-  peer.on("error", error => setRoomStatus(error.type === "peer-unavailable"
-    ? "Room not found. Ask the host to keep the lobby page open and recheck the code."
-    : `Could not join: ${error.type || "connection error"}.`));
+  peer.on("error", error => {
+    joiningRoom = false;
+    $("#join-game").disabled = false;
+    $("#join-game").textContent = "Join room";
+    $("#host-game").disabled = false;
+    $("#room-code").disabled = false;
+    setRoomStatus(error.type === "peer-unavailable"
+      ? "Room not found. Ask the host to keep the lobby page open and recheck the code."
+      : `Could not join: ${error.type || "connection error"}.`);
+  });
 }
 function handleGuestMessage(message) {
-  if (message?.type === "error") return setRoomStatus(message.message);
+  if (message?.type === "error") {
+    joiningRoom = false;
+    $("#join-game").disabled = false;
+    $("#join-game").textContent = "Join room";
+    $("#room-code").disabled = false;
+    return setRoomStatus(message.message);
+  }
   if (message?.type === "lobby") {
     localPlayerId = message.seat;
+    joiningRoom = true;
+    $("#join-game").disabled = true;
+    $("#join-game").textContent = "Joined";
+    $("#room-code").disabled = true;
     lobbySeats = message.seats || [];
     lobbyMaxPlayers = message.maxPlayers || 4;
     setRoomStatus(`Joined room <strong>${message.room}</strong>. Waiting for the host to start.`);
