@@ -34,7 +34,7 @@ h1 { margin-bottom: 4px; font: 700 clamp(1.5rem, 3vw, 2.35rem)/1.1 Georgia, seri
 .setup-card { width: min(900px, 100%); padding: clamp(26px, 4vw, 48px); border: 1px solid var(--line); background: rgba(255,253,248,.94); box-shadow: var(--shadow); }
 .lede { color: var(--muted); font-size: 1.08rem; }
 .setup-note { margin: -10px 0 20px; color: var(--muted); font-size: .82rem; }
-.setup-grid { display: grid; grid-template-columns: .8fr .7fr 1fr 1.8fr; gap: 16px; margin: 24px 0; }
+.setup-grid { display: grid; grid-template-columns: 1.1fr .9fr .65fr 1fr 1.7fr; gap: 14px; margin: 24px 0; }
 .banter-choice { display: flex; align-items: center; gap: 8px; grid-column: 1 / -1; }
 .banter-choice input { min-height: auto; width: 18px; height: 18px; }
 label { display: grid; gap: 6px; font-weight: 700; }
@@ -115,7 +115,7 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 .you-avatar { display: grid; place-items: center; flex: 0 0 44px; width: 44px; height: 44px; border-radius: 50%; background: var(--ink); color: white; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,.15); font-size: .58rem; font-weight: 900; }
 .you-avatar.awake { box-shadow: 0 0 0 3px #e3af5d, 0 5px 12px rgba(0,0,0,.15); transform: translateY(-2px); }
 .player-event { margin-top: 9px; padding: 6px 9px; border-radius: 7px; background: #f1eadc; color: #5a4a32; font-size: .72rem; font-weight: 900; animation: action-pop .28s ease-out both; }
-.player-quote { position: absolute; z-index: 20; left: 8px; bottom: calc(100% + 12px); width: max-content; max-width: min(260px, 72vw); padding: 10px 13px; border: 2px solid #d7b65e; border-radius: 16px 16px 16px 5px; background: #fff4cf; color: #55401d; box-shadow: 0 10px 25px rgba(50,38,19,.2); font-size: .8rem; line-height: 1.3; font-weight: 850; animation: speech-pop .35s cubic-bezier(.2,.9,.3,1.25) both; pointer-events: none; }
+.player-quote { position: absolute; z-index: 20; left: 8px; bottom: calc(100% + 12px); width: max-content; max-width: min(260px, 72vw); padding: 10px 13px; border: 2px solid #d7b65e; border-radius: 16px 16px 16px 5px; background: #fff4cf; color: #55401d; box-shadow: 0 10px 25px rgba(50,38,19,.2); font-size: .8rem; line-height: 1.3; font-weight: 850; pointer-events: none; }
 .player-quote::after { content: ""; position: absolute; left: 18px; bottom: -10px; width: 16px; height: 16px; border-right: 2px solid #d7b65e; border-bottom: 2px solid #d7b65e; background: #fff4cf; transform: rotate(45deg); }
 @keyframes speech-pop { from { opacity: 0; transform: translateY(10px) scale(.72); } }
 @keyframes action-pop { from { opacity: 0; transform: scale(.88); } }
@@ -127,7 +127,7 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 .collection .empty { padding-top: 3px; }
 .mini-art { position: relative; width: 54px; height: 68px; border: 3px solid white; border-radius: 3px; background: linear-gradient(to bottom, transparent 45%, rgba(0,0,0,.78)), var(--art) center/cover; box-shadow: 0 2px 7px #aaa; }
 .mini-art b { position: absolute; left: 4px; right: 4px; bottom: 4px; color: white; font-size: .58rem; line-height: 1; text-shadow: 0 1px 2px black; }
-.stage { display: grid; place-items: center; padding: 14px 18px; min-height: 0; text-align: center; overflow: hidden; }
+.stage { display: grid; place-items: center; height: 430px; min-height: 430px; max-height: 430px; padding: 14px 18px; text-align: center; overflow: hidden; }
 .stage-inner { width: min(1080px, 100%); }
 .stage-layout { display: grid; grid-template-columns: minmax(500px, 1fr) minmax(250px, 330px); gap: clamp(20px, 4vw, 48px); align-items: center; }
 .auction-focus { min-width: 0; display: grid; grid-template-columns: 200px minmax(260px, 1fr); grid-template-rows: auto auto auto auto; column-gap: 26px; align-items: center; }
@@ -280,7 +280,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
   .player { min-width: min(78vw, 260px); scroll-snap-align: start; }
   .avatar-wrap { flex-basis: 40px; width: 40px; height: 40px; }
   .table { gap: 9px; padding-top: 10px; }
-  .stage { min-height: 0; padding: 16px 10px; }
+  .stage { height: 440px; min-height: 440px; max-height: 440px; padding: 16px 10px; }
   .stage-layout { gap: 18px; }
   .auction-card { width: 145px; height: 180px; }
   .auction-source { max-width: 92%; }
@@ -311,7 +311,10 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
       <h1>Modern Art <span class="version" data-version></span></h1>
       <p class="lede">Buy emerging art. Shape the market. Try not to applaud your own bid.</p>
       <div class="setup-grid">
-        <label>You are
+        <label>Your name
+          <input id="player-name" maxlength="20" value="You" placeholder="Your name">
+        </label>
+        <label>Your character
           <select id="character-select">
             <option value="fred" selected>Fred</option>
             <option value="greg">Greg</option>
@@ -412,7 +415,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.10.4";
+const VERSION = "0.11.0";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -534,6 +537,8 @@ function familyQuip(p, kind) {
 }
 function maybeFamilyQuip(p, kind, chance = .45) {
   if (!p || isLocalPlayer(p) || Math.random() > chance) return;
+  state.players.forEach(player => { player.quip = ""; });
+  Object.values(familyQuipTimers).forEach(clearTimeout);
   p.quip = familyQuip(p, kind);
   if (!p.quip) return;
   clearTimeout(familyQuipTimers[p.id]);
@@ -541,7 +546,7 @@ function maybeFamilyQuip(p, kind, chance = .45) {
     if (!state?.players?.[p.id]) return;
     state.players[p.id].quip = "";
     render();
-  }, 11000);
+  }, 8000);
 }
 function avatarMarkup(p, className = "") {
   const key = p.characterKey || FAMILY.find(x => x.name === p.name)?.key;
@@ -561,6 +566,7 @@ function makeDeck() {
 
 function startGame(options = {}) {
   const count = +$("#player-count").value;
+  const playerName = $("#player-name").value.trim() || "You";
   const humanKey = $("#character-select").value;
   const familyBanter = $("#family-banter").checked;
   const opponents = familyBanter
@@ -576,14 +582,14 @@ function startGame(options = {}) {
     auction: null, message: "Choose a painting from your hand to begin the auction.",
     familyBanter,
     players: Array.from({ length: count }, (_, i) => ({
-      id: i, name: roster[i].name, characterKey: roster[i].key || null,
+      id: i, name: i === 0 ? playerName : roster[i].name, characterKey: roster[i].key || null,
       avatar: roster[i].avatar || null,
       human: i === 0 || (networkMode === "host" && i === 1), online: networkMode === "host" && i < 2,
       cash: 100, hand: [], collection: [], passed: false, status: ""
     }))
   };
   if (networkMode === "host") {
-    state.players[0].name = "Host";
+    state.players[0].name = playerName;
     state.players[1].name = options.guestName || "Guest";
     state.players[1].avatar = null;
   }
@@ -643,7 +649,6 @@ function launchCard(player, cardId) {
   const card = player.hand.splice(index, 1)[0];
   state.players.forEach(p => { p.status = ""; p.reaction = ""; p.quip = ""; });
   player.status = `Selling ${artist(card.artist).name} · ${TYPES[card.type].name}`;
-  maybeFamilyQuip(player, "win", .38);
   state.auction = { card, originalType: card.type, seller: player.id, cards: [card], bid: 0, bidder: null, acted: [], cursor: (player.id + 1) % state.players.length };
   state.tableCounts[card.artist]++;
   if (state.tableCounts[card.artist] >= 5) return endRound(card);
@@ -705,7 +710,6 @@ function placeBid(p, amount) {
   state.auction.bid = amount;
   state.auction.bidder = p.id;
   p.status = `Bid ${money(amount)}`;
-  maybeFamilyQuip(p, "win", .32);
   if (isLocalPlayer(p)) learnLocal("bids", amount);
   if (state.auction.card.type === "once") state.auction.acted.push(p.id);
   state.auction.cursor = (p.id + 1) % state.players.length;
@@ -714,7 +718,6 @@ function placeBid(p, amount) {
 
 function passBid(p) {
   p.status = "Passed";
-  maybeFamilyQuip(p, "pass", .58);
   if (isLocalPlayer(p)) learnLocal("passes");
   if (state.auction.card.type === "once") state.auction.acted.push(p.id);
   else p.passed = true;
@@ -878,16 +881,10 @@ function resolveAuction() {
   if (a.bidder === null) {
     seller.collection.push(...a.cards);
     seller.status = `Kept ${artist(a.card.artist).name} for free`;
-    auctionResult(`No sale — ${seller.name} keeps ${a.cards.length > 1 ? `both ${artist(a.card.artist).name} paintings` : `the ${artist(a.card.artist).name}`}.`, seller.id);
+    auctionResult(`No sale — ${seller.name} keeps ${a.cards.length > 1 ? `both ${artist(a.card.artist).name} paintings` : `the ${artist(a.card.artist).name}`}.`, seller.id, "pass");
     state.history.push({ kind: "auction", round: state.round, artist: a.card.artist, auctionType: a.originalType, seller: seller.name, buyer: seller.name, price: 0, quantity: a.cards.length });
   } else {
     const buyer = state.players[a.bidder];
-    state.players.forEach(p => {
-      if (p.id !== buyer.id && p.id !== a.seller && !isLocalPlayer(p)) {
-        maybeFamilyQuip(p, "pass", .72);
-        p.reaction = "grumble";
-      }
-    });
     buyer.cash -= a.bid;
     if (buyer.id !== seller.id) {
       if (a.payoutMode === "matcher") state.players[a.matchingSeller].cash += a.bid;
@@ -898,7 +895,6 @@ function resolveAuction() {
     }
     buyer.collection.push(...a.cards);
     buyer.status = `Bought ${a.cards.length > 1 ? "the pair" : artist(a.card.artist).name} for ${money(a.bid)}`;
-    maybeFamilyQuip(buyer, "win", .92);
     if (buyer.id !== seller.id) seller.status = `Sold for ${money(a.bid)}`;
     auctionResult(`${isLocalPlayer(buyer) ? "You win" : `${buyer.name} wins`} ${a.cards.length > 1 ? `two ${artist(a.card.artist).name} paintings` : artist(a.card.artist).name} for ${money(a.bid)}!`, buyer.id);
     state.history.push({ kind: "auction", round: state.round, artist: a.card.artist, auctionType: a.originalType, seller: seller.name, buyer: buyer.name, price: a.bid, quantity: a.cards.length });
@@ -1248,17 +1244,22 @@ function roundResult(text) {
   clearTimeout(toast.timer); toast.timer = setTimeout(() => el.classList.remove("show", "result", "round-result"), 5000);
   if (networkMode === "host") guestConnections.filter(c => c.open).forEach(c => c.send({ type: "notice", text, duration: 5000 }));
 }
-function auctionResult(text, playerId) {
-  state.playerNotices ||= {};
-  state.playerNotices[playerId] = text;
+function auctionResult(text, playerId, quipKind = "win") {
+  state.players.forEach(p => { p.quip = ""; });
+  state.playerNotices = { [playerId]: text };
   render();
   clearTimeout(auctionResult.timers?.[playerId]);
   auctionResult.timers ||= {};
   auctionResult.timers[playerId] = setTimeout(() => {
     if (!state?.playerNotices) return;
-    delete state.playerNotices[playerId];
+    state.playerNotices = {};
+    const winner = state.players[playerId];
+    const speaker = !isLocalPlayer(winner) && winner.characterKey
+      ? winner
+      : shuffle(state.players.filter(p => !isLocalPlayer(p) && p.characterKey))[0];
+    maybeFamilyQuip(speaker, quipKind, 1);
     render();
-  }, 10000);
+  }, 5000);
 }
 
 function roomCodeFromId(id) {
@@ -1296,12 +1297,12 @@ function createRoom() {
     connection.on("data", message => handleHostMessage(connection, message));
     connection.on("open", () => {
       if (state) {
-        state.players[1].name = "Greg";
+        state.players[1].name = "Guest";
         state.players[1].online = true;
         state.players[1].human = true;
         connection.send({ type: "state", state, seat: 1, room: code });
         render();
-        toast("Greg joined the table.");
+        toast("A guest connected.");
       }
     });
     connection.on("close", () => {
@@ -1325,7 +1326,14 @@ function joinRoom() {
   peer = new Peer();
   peer.on("open", () => {
     hostConnection = peer.connect(peerIdFromCode(code), { reliable: true });
-    hostConnection.on("open", () => setRoomStatus("Connected. Waiting for the table…"));
+    hostConnection.on("open", () => {
+      setRoomStatus("Connected. Waiting for the table…");
+      hostConnection.send({
+        type: "hello",
+        name: $("#player-name").value.trim() || "Guest",
+        characterKey: $("#character-select").value
+      });
+    });
     hostConnection.on("data", handleGuestMessage);
     hostConnection.on("close", () => toast("The host disconnected."));
     hostConnection.on("error", () => setRoomStatus("Could not connect to that room."));
@@ -1350,9 +1358,19 @@ function sendAction(action, payload = {}) {
   hostConnection.send({ type: "action", action, payload });
 }
 function handleHostMessage(connection, message) {
-  if (message?.type !== "action" || !state) return;
+  if (!state) return;
   const playerId = 1;
   const p = state.players[playerId];
+  if (message?.type === "hello") {
+    p.name = String(message.name || "Guest").trim().slice(0, 20) || "Guest";
+    p.characterKey = FAMILY.some(x => x.key === message.characterKey) ? message.characterKey : null;
+    p.avatar = null;
+    p.online = true;
+    connection.send({ type: "state", state, seat: 1, room: roomCodeFromId(roomId) });
+    render();
+    return toast(`${p.name} joined the table.`);
+  }
+  if (message?.type !== "action") return;
   const { action, payload = {} } = message;
   if (action === "play" && state.phase === "choose" && state.turn === playerId) launchCard(p, payload.cardId);
   else if (action === "bid" && activePlayerId() === playerId) placeBid(p, payload.amount);
