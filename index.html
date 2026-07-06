@@ -45,7 +45,7 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 .big { padding: 13px 22px; }
 .quiet { border: 1px solid var(--line); background: transparent; }
 .game { max-width: 1500px; margin: auto; padding: 18px; }
-.topbar { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 14px; }
+.topbar { display: flex; justify-content: space-between; align-items: center; gap: 20px; height: 62px; min-height: 62px; max-height: 62px; margin-bottom: 14px; overflow: hidden; }
 .top-actions { display: flex; gap: 8px; }
 .auction-guide { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; padding: 10px; background: rgba(255,253,248,.76); border: 1px solid var(--line); border-radius: 14px 14px 0 0; }
 .guide-item { position: relative; display: flex; align-items: center; gap: 10px; min-width: 0; padding: 9px 10px; border-radius: 10px; color: var(--muted); opacity: .7; }
@@ -54,7 +54,7 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 .guide-icon { font-size: 1.45rem; }
 .guide-item strong, .guide-item small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .guide-item small { font-size: .72rem; }
-.market { background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 14px; overflow-x: auto; box-shadow: 0 7px 22px rgba(45,38,28,.09); }
+.market { height: 192px; min-height: 192px; max-height: 192px; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 14px; overflow-x: auto; overflow-y: hidden; box-shadow: 0 7px 22px rgba(45,38,28,.09); }
 .market-grid { display: grid; grid-template-columns: 105px repeat(5, minmax(120px, 1fr)); min-width: 710px; }
 .market-cell, .market-label { min-height: 35px; display: flex; align-items: center; justify-content: center; padding: 6px 10px; border-right: 1px solid #e1dacf; border-bottom: 1px solid #e9e3d9; }
 .market-label { justify-content: flex-start; gap: 7px; background: #f1ece3; color: var(--muted); font-size: .72rem; font-weight: 800; letter-spacing: .03em; }
@@ -82,7 +82,7 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 .artist-stats strong { color: white; }
 .artist-count { display: flex; gap: 3px; margin-top: 8px; min-height: 7px; }
 .artist-count i { width: 14px; height: 6px; border-radius: 3px; background: var(--artist); }
-.table { display: grid; grid-template-rows: auto auto auto; gap: 12px; padding: 16px 0 50px; }
+.table { display: grid; grid-template-rows: 430px 205px 215px; gap: 12px; padding: 16px 0 50px; }
 .opponents { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; align-items: stretch; }
 .player, .player-area, .stage { border: 1px solid var(--line); background: rgba(255,253,248,.92); box-shadow: 0 5px 18px rgba(45,38,28,.07); border-radius: 14px; }
 .player-area.current-hand { outline: 3px solid #dca652; background: #fffaf0; box-shadow: 0 8px 24px rgba(182,121,50,.16); }
@@ -197,7 +197,7 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; }
 .bid-row { display: flex; justify-content: center; gap: 8px; align-items: center; }
 .bid-row input { width: 110px; }
-.player-area { padding: 12px 14px; }
+.player-area { height: 215px; min-height: 215px; max-height: 215px; padding: 12px 14px; overflow: hidden; }
 .your-summary { display: flex; justify-content: space-between; align-items: center; gap: 14px; }
 .section-note { display: block; margin-top: 2px; color: var(--muted); }
 .hand-heading { display: flex; justify-content: space-between; gap: 12px; align-items: end; }
@@ -279,8 +279,9 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
   .opponents { display: flex; overflow-x: auto; padding: 3px; scroll-snap-type: x mandatory; }
   .player { min-width: min(78vw, 260px); scroll-snap-align: start; }
   .avatar-wrap { flex-basis: 40px; width: 40px; height: 40px; }
-  .table { gap: 9px; padding-top: 10px; }
+  .table { grid-template-rows: 440px 205px 205px; gap: 9px; padding-top: 10px; }
   .stage { height: 440px; min-height: 440px; max-height: 440px; padding: 16px 10px; }
+  .player-area { height: 205px; min-height: 205px; max-height: 205px; }
   .stage-layout { gap: 18px; }
   .auction-card { width: 145px; height: 180px; }
   .auction-source { max-width: 92%; }
@@ -415,7 +416,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.11.0";
+const VERSION = "0.11.1";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
