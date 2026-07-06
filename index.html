@@ -157,7 +157,7 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 .player-event { flex: 0 0 62px; height: 62px; min-height: 62px; max-height: 62px; display: flex; flex-direction: column; gap: 1px; margin-top: 9px; padding: 5px 9px; overflow: hidden; border-radius: 7px; background: #f1eadc; color: #5a4a32; font-size: .69rem; line-height: 1.18; font-weight: 850; }
 .player-event span { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .player-event.major { border-left: 5px solid #dca652; background: #e5f4ea; color: #185f3e; animation: action-pop .28s ease-out both; }
-.player-quote { position: absolute; z-index: 20; left: 8px; bottom: calc(100% + 12px); width: max-content; max-width: min(260px, 72vw); padding: 10px 13px; border: 2px solid #d7b65e; border-radius: 16px 16px 16px 5px; background: #fff4cf; color: #55401d; box-shadow: 0 10px 25px rgba(50,38,19,.2); font-size: .8rem; line-height: 1.3; font-weight: 850; pointer-events: none; }
+.player-quote { position: absolute; z-index: 20; left: 8px; bottom: calc(100% + 12px); width: max-content; max-width: min(260px, 72vw); padding: 10px 13px; border: 2px solid #d7b65e; border-radius: 16px 16px 16px 5px; background: #fff4cf; color: #55401d; box-shadow: 0 10px 25px rgba(50,38,19,.2); font-size: .8rem; line-height: 1.3; font-weight: 850; pointer-events: none; animation: speech-pop .25s ease-out both; }
 .player-quote::after { content: ""; position: absolute; left: 18px; bottom: -10px; width: 16px; height: 16px; border-right: 2px solid #d7b65e; border-bottom: 2px solid #d7b65e; background: #fff4cf; transform: rotate(45deg); }
 @keyframes speech-pop { from { opacity: 0; transform: translateY(10px) scale(.72); } }
 @keyframes action-pop { from { opacity: 0; transform: scale(.88); } }
@@ -515,7 +515,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.14.1";
+const VERSION = "0.14.2";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -647,8 +647,7 @@ function familyQuip(p, kind) {
 }
 function maybeFamilyQuip(p, kind, chance = .45) {
   if (!p || isLocalPlayer(p) || Math.random() > chance) return;
-  state.players.forEach(player => { player.quip = ""; });
-  Object.values(familyQuipTimers).forEach(clearTimeout);
+  if (state.players.some(player => player.quip)) return;
   p.quip = familyQuip(p, kind);
   if (!p.quip) return;
   clearTimeout(familyQuipTimers[p.id]);
@@ -656,7 +655,7 @@ function maybeFamilyQuip(p, kind, chance = .45) {
     if (!state?.players?.[p.id]) return;
     state.players[p.id].quip = "";
     render();
-  }, 8000);
+  }, 10000);
 }
 function avatarMarkup(p, className = "") {
   const key = p.characterKey || FAMILY.find(x => x.name === p.name)?.key;
@@ -772,7 +771,7 @@ function launchCard(player, cardId) {
   if (index < 0) return;
   const card = player.hand.splice(index, 1)[0];
   state.openingAnnouncement = false;
-  state.players.forEach(p => { p.status = ""; p.reaction = ""; p.quip = ""; });
+  state.players.forEach(p => { p.status = ""; p.reaction = ""; });
   player.status = `Selling ${artist(card.artist).name} · ${TYPES[card.type].name}`;
   state.auction = { card, originalType: card.type, seller: player.id, cards: [card], bid: 0, bidder: null, acted: [], cursor: (player.id + 1) % state.players.length, actionsByPlayer: {} };
   recordTurnAction(player, `Offered ${artist(card.artist).name} · ${TYPES[card.type].name}`);
@@ -1462,7 +1461,6 @@ function roundResult(text) {
   if (networkMode === "host") guestConnections.filter(c => c.open).forEach(c => c.send({ type: "notice", text, duration: 5000 }));
 }
 function auctionResult(text, playerId, quipKind = "win") {
-  state.players.forEach(p => { p.quip = ""; });
   state.playerNotices = { [playerId]: text };
   if (playerId === localPlayerId && quipKind === "win") {
     document.body.classList.remove("win-celebration");
