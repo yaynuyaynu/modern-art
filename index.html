@@ -416,7 +416,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.11.1";
+const VERSION = "0.11.2";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -828,33 +828,53 @@ function fixedDecisionFor(playerId, accept) {
 }
 
 function doubleStart() {
-  const seller = state.players[state.auction.seller];
-  const matches = seller.hand.filter(c => c.artist === state.auction.card.artist && c.type !== "double");
-  if (matches.length) {
-    if (seller.human) {
-      state.message = "Double auction: choose a matching painting to sell as a pair.";
-      render();
-    } else {
-      setTimeout(() => addDouble(matches[Math.floor(Math.random() * matches.length)].id, seller.id), 450);
+  state.auction.doubleOrder ||= [
+    state.auction.seller,
+    ...state.players.slice(state.auction.seller + 1)
+      .concat(state.players.slice(0, state.auction.seller))
+      .map(p => p.id)
+      .filter(id => id !== state.auction.seller)
+  ];
+  state.auction.doubleIndex ||= 0;
+  offerDoubleMatch();
+}
+
+function offerDoubleMatch() {
+  const a = state.auction;
+  while (a.doubleIndex < a.doubleOrder.length) {
+    const player = state.players[a.doubleOrder[a.doubleIndex]];
+    const matches = player.hand.filter(c => c.artist === a.card.artist && c.type !== "double");
+    if (!matches.length) {
+      a.doubleIndex++;
+      continue;
     }
-  } else {
-    const order = state.players.slice(seller.id + 1).concat(state.players.slice(0, seller.id));
-    const matcher = order.find(p => p.hand.some(c => c.artist === state.auction.card.artist && c.type !== "double"));
-    if (!matcher) {
-      state.message = "Nobody could add a matching painting. The original auctioneer keeps it for free.";
-      state.auction.bidder = state.auction.seller;
-      state.auction.bid = 0;
-      render(); setTimeout(resolveAuction, 650);
-    } else if (matcher.human) {
-      state.auction.matcher = matcher.id;
-      state.message = `${matcher.name} can match the Double with another ${artist(state.auction.card.artist).name}.`;
-      render();
-    } else {
-      state.auction.matcher = matcher.id;
-      const match = matcher.hand.find(c => c.artist === state.auction.card.artist && c.type !== "double");
-      setTimeout(() => addDouble(match.id, matcher.id), 450);
+    a.matcher = player.id;
+    state.message = `${player.name} may add a matching ${artist(a.card.artist).name} painting—or pass.`;
+    render();
+    if (isComputer(player) && networkMode !== "guest") {
+      const match = matches[Math.floor(Math.random() * matches.length)];
+      setTimeout(() => Math.random() < .8 ? addDouble(match.id, player.id) : passDoubleFor(player.id), 450);
     }
+    return;
   }
+  state.message = "Nobody added a matching painting. The original auctioneer keeps it for free.";
+  a.bidder = a.seller;
+  a.bid = 0;
+  render();
+  setTimeout(resolveAuction, 650);
+}
+
+function passDouble() {
+  if (networkMode === "guest") return sendAction("doublePass");
+  passDoubleFor(localPlayerId);
+}
+
+function passDoubleFor(playerId) {
+  const a = state.auction;
+  if (!a || a.matcher !== playerId) return;
+  state.players[playerId].status = "Passed on the pair";
+  a.doubleIndex++;
+  offerDoubleMatch();
 }
 
 function addDouble(cardId, ownerId = state.auction.seller) {
@@ -865,15 +885,21 @@ function addDouble(cardId, ownerId = state.auction.seller) {
   const card = owner.hand.splice(i, 1)[0];
   state.auction.cards.push(card);
   if (ownerId !== state.auction.seller) {
-    state.auction.matchingSeller = ownerId;
-    state.auction.payoutMode = state.rule === "mayfair" ? "split" : "matcher";
+    state.auction.originalSeller = state.auction.seller;
+    state.auction.seller = ownerId;
+    state.turn = ownerId;
   }
   state.tableCounts[card.artist]++;
   if (state.tableCounts[card.artist] >= 5) return endRound(card);
-  state.auction.card.type = "open";
-  state.phase = "open";
-  state.message = "Two paintings are being sold together. Open bidding begins.";
-  render(); auctionTurn();
+  state.auction.card.type = card.type;
+  state.auction.cursor = (state.auction.seller + 1) % state.players.length;
+  state.auction.acted = [];
+  state.players.forEach(p => p.passed = false);
+  state.phase = card.type;
+  state.message = `Two paintings are being sold together by ${TYPES[card.type].name}.`;
+  if (card.type === "sealed") state.auction.secret = {};
+  render();
+  continueAuction();
 }
 
 function resolveAuction() {
@@ -887,20 +913,13 @@ function resolveAuction() {
   } else {
     const buyer = state.players[a.bidder];
     buyer.cash -= a.bid;
-    if (buyer.id !== seller.id) {
-      if (a.payoutMode === "matcher") state.players[a.matchingSeller].cash += a.bid;
-      else if (a.payoutMode === "split") {
-        seller.cash += Math.ceil(a.bid / 2);
-        state.players[a.matchingSeller].cash += Math.floor(a.bid / 2);
-      } else seller.cash += a.bid;
-    }
+    if (buyer.id !== seller.id) seller.cash += a.bid;
     buyer.collection.push(...a.cards);
     buyer.status = `Bought ${a.cards.length > 1 ? "the pair" : artist(a.card.artist).name} for ${money(a.bid)}`;
     if (buyer.id !== seller.id) seller.status = `Sold for ${money(a.bid)}`;
     auctionResult(`${isLocalPlayer(buyer) ? "You win" : `${buyer.name} wins`} ${a.cards.length > 1 ? `two ${artist(a.card.artist).name} paintings` : artist(a.card.artist).name} for ${money(a.bid)}!`, buyer.id);
     state.history.push({ kind: "auction", round: state.round, artist: a.card.artist, auctionType: a.originalType, seller: seller.name, buyer: buyer.name, price: a.bid, quantity: a.cards.length });
   }
-  if (a.matchingSeller !== undefined) state.turn = a.matchingSeller;
   setTimeout(nextTurn, 700);
 }
 
@@ -929,10 +948,16 @@ function endRound(triggerCard) {
   });
   if (state.round === 4) {
     state.phase = "gameover";
-    const winner = [...state.players].sort((a,b) => b.cash - a.cash)[0];
+    const standings = [...state.players].sort((a,b) => b.cash - a.cash);
+    const winner = standings[0];
     state.message = `Game over — ${winner.name} wins with ${money(winner.cash)}. ${summary}`;
     state.auction = null;
-    state.roundPresentation = { ...presentation, gameover: true, winner: winner.name };
+    state.roundPresentation = {
+      ...presentation,
+      gameover: true,
+      winner: winner.name,
+      standings: standings.map((p, index) => ({ place: index + 1, name: p.name, cash: p.cash }))
+    };
     render();
     return;
   }
@@ -1003,8 +1028,11 @@ function renderRoundResults() {
       <strong>${ar.name}</strong><b>${money(item.value)} each</b>
     </div>`;
   }).join("");
-  $("#round-payouts").innerHTML = state.players.map(p => `<div class="payout-row">
-    <strong>${p.name}</strong><span>+${money(result.payouts[p.name] || 0)}</span><b>${money(p.cash)} total</b>
+  const resultPlayers = result.gameover
+    ? result.standings.map(row => ({ ...state.players.find(p => p.name === row.name), place: row.place }))
+    : state.players;
+  $("#round-payouts").innerHTML = resultPlayers.map(p => `<div class="payout-row">
+    <strong>${result.gameover ? `${p.place}. ` : ""}${p.name}</strong><span>+${money(result.payouts[p.name] || 0)} this round</span><b>${money(p.cash)} total</b>
   </div>`).join("");
   dialog.showModal();
 }
@@ -1146,9 +1174,14 @@ function renderStage() {
       ? `${isLocalPlayer(seller) ? "You are" : `${seller.name} is`} selling 2 ${ar.name} paintings`
       : `${isLocalPlayer(seller) ? "You are selling" : `${seller.name} played`} ${ar.name}`;
     const typeText = quantity > 1 ? `${originalType.icon} ${originalType.name} · Open bidding for the pair` : `${originalType.icon} ${originalType.name}`;
+    const pairType = quantity > 1 ? TYPES[a.cards[1].type] : originalType;
+    const displayedTypeText = quantity > 1 ? `${pairType.icon} ${pairType.name} for the pair` : typeText;
     const cardMarkup = `<div class="auction-card" style="--artist:${ar.color};--art:url('${ar.image}')"><strong>${ar.name}</strong><span class="type">${originalType.icon} ${originalType.name}</span></div>`;
-    visual = `<div class="auction-source">${avatarMarkup(seller, "seller-avatar-photo mood-selling")}<span><strong>${sellerText}</strong><small>${typeText}</small></span></div>
-      <div class="auction-lot ${quantity > 1 ? "is-pair" : ""}" aria-label="${quantity} ${ar.name} painting${quantity > 1 ? "s" : ""}">${cardMarkup}${quantity > 1 ? cardMarkup : ""}</div>`;
+    const secondCardMarkup = quantity > 1
+      ? `<div class="auction-card" style="--artist:${ar.color};--art:url('${ar.image}')"><strong>${ar.name}</strong><span class="type">${pairType.icon} ${pairType.name}</span></div>`
+      : "";
+    visual = `<div class="auction-source">${avatarMarkup(seller, "seller-avatar-photo mood-selling")}<span><strong>${sellerText}</strong><small>${displayedTypeText}</small></span></div>
+      <div class="auction-lot ${quantity > 1 ? "is-pair" : ""}" aria-label="${quantity} ${ar.name} painting${quantity > 1 ? "s" : ""}">${cardMarkup}${secondCardMarkup}</div>`;
     const ranked = [...ARTISTS].sort((x, y) => state.tableCounts[y.id] - state.tableCounts[x.id] || ARTISTS.indexOf(x) - ARTISTS.indexOf(y));
     const place = ranked.findIndex(x => x.id === ar.id) + 1;
     const bonus = [30, 20, 10, 0, 0][place - 1];
@@ -1182,7 +1215,8 @@ function renderStage() {
   else if (state.phase === "choose" && canLocalAct(current()))
     controls = `<p class="auction-copy">Choose any painting from your hand below.</p>`;
   else if (state.phase === "double" && (a?.seller === localPlayerId || a?.matcher === localPlayerId))
-    controls = `<p class="auction-copy">Choose a second ${artist(a.card.artist).name} painting from your hand.</p>`;
+    controls = `<p class="auction-copy">Choose a matching ${artist(a.card.artist).name} painting, or pass.</p>
+      <div class="actions"><button onclick="passDouble()">Pass</button></div>`;
   $("#stage").innerHTML = `<div class="stage-inner"><div class="stage-layout"><div class="auction-focus">${visual}<h2>${stageTitle()}</h2><p class="instruction">${state.message}</p>${controls}</div>${forecast}</div></div>`;
 }
 
@@ -1386,6 +1420,7 @@ function handleHostMessage(connection, message) {
   }
   else if (action === "fixed" && state.phase === "fixed" && state.auction?.cursor === playerId) fixedDecisionFor(playerId, !!payload.accept);
   else if (action === "double" && state.phase === "double" && (state.auction?.seller === playerId || state.auction?.matcher === playerId)) addDouble(payload.cardId, playerId);
+  else if (action === "doublePass" && state.phase === "double" && state.auction?.matcher === playerId) passDoubleFor(playerId);
 }
 function broadcastState() {
   const packet = { type: "state", state, seat: 1, room: roomCodeFromId(roomId) };
