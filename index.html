@@ -90,7 +90,7 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 .player-win-pop { position: absolute; z-index: 5; inset: 7px; display: grid; place-items: center; padding: 12px; border: 3px solid #dca652; border-radius: 10px; background: rgba(29,85,57,.96); color: white; box-shadow: 0 8px 24px rgba(0,0,0,.24); text-align: center; font: 900 1rem/1.25 sans-serif; }
 .player.current { outline: 3px solid #dca652; }
 .player.seller { background: #fff9e9; }
-.player-profile { display: flex; gap: 10px; align-items: center; }
+.player-profile { position: relative; display: flex; gap: 10px; align-items: center; }
 .player-copy { min-width: 0; flex: 1; }
 .avatar-wrap { position: relative; flex: 0 0 44px; width: 44px; height: 44px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,.15); overflow: visible; filter: grayscale(.65); opacity: .72; transition: .2s; }
 .avatar-wrap img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
@@ -115,8 +115,9 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 .you-avatar { display: grid; place-items: center; flex: 0 0 44px; width: 44px; height: 44px; border-radius: 50%; background: var(--ink); color: white; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,.15); font-size: .58rem; font-weight: 900; }
 .you-avatar.awake { box-shadow: 0 0 0 3px #e3af5d, 0 5px 12px rgba(0,0,0,.15); transform: translateY(-2px); }
 .player-event { margin-top: 9px; padding: 6px 9px; border-radius: 7px; background: #f1eadc; color: #5a4a32; font-size: .72rem; font-weight: 900; animation: action-pop .28s ease-out both; }
-.player-quote { position: relative; margin: 8px 0 2px 10px; padding: 8px 10px; border-radius: 10px; background: #fff4cf; color: #55401d; font-size: .76rem; font-weight: 800; animation: action-pop .28s ease-out both; }
-.player-quote::before { content: ""; position: absolute; left: 14px; top: -7px; border: 7px solid transparent; border-bottom-color: #fff4cf; border-top: 0; }
+.player-quote { position: absolute; z-index: 20; left: 8px; bottom: calc(100% + 12px); width: max-content; max-width: min(260px, 72vw); padding: 10px 13px; border: 2px solid #d7b65e; border-radius: 16px 16px 16px 5px; background: #fff4cf; color: #55401d; box-shadow: 0 10px 25px rgba(50,38,19,.2); font-size: .8rem; line-height: 1.3; font-weight: 850; animation: speech-pop .35s cubic-bezier(.2,.9,.3,1.25) both; pointer-events: none; }
+.player-quote::after { content: ""; position: absolute; left: 18px; bottom: -10px; width: 16px; height: 16px; border-right: 2px solid #d7b65e; border-bottom: 2px solid #d7b65e; background: #fff4cf; transform: rotate(45deg); }
+@keyframes speech-pop { from { opacity: 0; transform: translateY(10px) scale(.72); } }
 @keyframes action-pop { from { opacity: 0; transform: scale(.88); } }
 .player-head { display: flex; justify-content: space-between; gap: 8px; }
 .player-head strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -409,7 +410,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.10.1";
+const VERSION = "0.10.2";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -538,7 +539,7 @@ function maybeFamilyQuip(p, kind, chance = .45) {
     if (!state?.players?.[p.id]) return;
     state.players[p.id].quip = "";
     render();
-  }, 7000);
+  }, 11000);
 }
 function avatarMarkup(p, className = "") {
   const key = p.characterKey || FAMILY.find(x => x.name === p.name)?.key;
@@ -1081,11 +1082,11 @@ function renderPlayers() {
       ${state.playerNotices?.[p.id] ? `<div class="player-win-pop">${state.playerNotices[p.id]}</div>` : ""}
       <div class="player-profile">
         ${avatarMarkup(p, `mood-${mood} ${activeId === p.id ? "awake" : ""}`)}
+        ${p.quip ? `<div class="player-quote">“${p.quip}”</div>` : ""}
         <div class="player-copy"><div class="player-head"><strong>${p.name}${p.online ? '<span class="online-pill">ONLINE</span>' : ""}${state.auction?.seller === p.id ? '<span class="seller-badge">SELLING</span>' : ""}</strong><span class="cash">${money(p.cash)}</span></div>
         <small>${p.hand.length} in hand · ${p.collection.length} in this round</small></div>
       </div>
       ${p.status ? `<div class="player-event">${p.status}</div>` : ""}
-      ${p.quip ? `<div class="player-quote">“${p.quip}”</div>` : ""}
       <div class="collection">${collectionHTML(p)}</div>
     </article>`;
   }).join("");
