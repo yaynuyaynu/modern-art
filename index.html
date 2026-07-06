@@ -450,11 +450,12 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
       <input id="show-history-sidebar" type="checkbox">
       <span><strong>Show game history</strong><small>Keep a round-by-round record on the right.</small></span>
     </label>
-    <label>Computer pace
+    <label>Game pace
       <select id="ai-pace">
         <option value="2400">Easy to follow</option>
         <option value="1600">Normal</option>
         <option value="700">Quick</option>
+        <option value="0">No pauses</option>
       </select>
     </label>
     <label>Appearance
@@ -499,7 +500,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.13.2";
+const VERSION = "0.13.3";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -583,7 +584,7 @@ const familyQuipTimers = {};
 
 let state = null;
 let aiPace = +(localStorage.getItem("modern-art-ai-pace") || 2400);
-if (![2400, 1600, 700].includes(aiPace)) aiPace = 2400;
+if (![2400, 1600, 700, 0].includes(aiPace)) aiPace = 2400;
 let historySidebarVisible = localStorage.getItem("modern-art-history-sidebar") === "true";
 function aiDelay(scale = 1) { return Math.round(aiPace * scale); }
 let colorTheme = localStorage.getItem("modern-art-theme") || "light";
@@ -689,7 +690,10 @@ function startGame(options = {}) {
     state.players[1].avatar = null;
   }
   deal(roundDealCount());
-  state.message = `${current().name} was randomly chosen to go first. ${current().name} plays the first painting.`;
+  const starter = current();
+  state.message = isLocalPlayer(starter)
+    ? "You were randomly chosen to go first. You play the first painting."
+    : `${starter.name} was randomly chosen to go first. ${starter.name} plays the first painting.`;
   $("#setup").classList.add("hidden");
   $("#game").classList.remove("hidden");
   render();
@@ -1141,9 +1145,13 @@ function renderNewCards() {
   const starter = state.players[state.startingPlayerId];
   const isOpeningDeal = state.round === 1 && state.openingAnnouncement;
   $(".new-cards-dialog > p:not(.eyebrow)").textContent = isOpeningDeal
-    ? `${starter.name} was randomly chosen to go first. After this window closes, ${starter.name} plays the first painting.`
+    ? (isLocalPlayer(starter)
+      ? "You were randomly chosen to go first. After this window closes, you play the first painting."
+      : `${starter.name} was randomly chosen to go first. After this window closes, ${starter.name} plays the first painting.`)
     : "These were just added to your private hand.";
-  $("#new-cards-close").textContent = isOpeningDeal ? `Start — ${starter.name} goes first` : "Got it";
+  $("#new-cards-close").textContent = isOpeningDeal
+    ? `Start — ${isLocalPlayer(starter) ? "You go first" : `${starter.name} goes first`}`
+    : "Got it";
   $("#new-cards-list").innerHTML = cards.map(c => {
     const ar = artist(c.artist);
     return `<div class="new-card" style="--artist:${ar.color};--art:url('${ar.image}')">
