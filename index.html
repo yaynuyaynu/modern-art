@@ -285,8 +285,16 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 .toast.result.player-result { bottom: auto; width: min(350px, calc(100% - 24px)); padding: 18px 22px; border: 0; border-left: 7px solid #dca652; border-radius: 8px; background: rgba(35,32,27,.98); box-shadow: 0 12px 35px rgba(0,0,0,.34); transform: translate(-50%, -50%) scale(.72); transform-origin: center; font: 900 clamp(1rem, 2vw, 1.3rem)/1.2 sans-serif; letter-spacing: -.01em; text-transform: none; }
 .toast.result.player-result.show { transform: translate(-50%, -50%) scale(1); }
 .toast.round-result { border-color: #68a9dc; background: linear-gradient(145deg, rgba(35,32,27,.98), rgba(42,55,68,.98)); }
-.new-cards-dialog { width: min(920px, calc(100% - 28px)); text-align: center; }
+.new-cards-dialog { width: min(920px, calc(100% - 28px)); max-height: calc(100dvh - 28px); overflow-y: auto; text-align: center; }
 .new-cards-dialog > p:not(.eyebrow) { color: var(--muted); }
+.opening-order { width: min(560px, 100%); display: grid; gap: 6px; margin: 14px auto 4px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); text-align: left; }
+.opening-order > strong { margin-bottom: 3px; color: var(--gold); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; }
+.opening-player { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 9px; align-items: center; min-height: 42px; padding: 6px 9px; border-radius: 8px; background: var(--panel); }
+.opening-player.starts { outline: 2px solid var(--gold); background: color-mix(in srgb, var(--gold) 13%, var(--panel)); }
+.opening-number { width: 25px; height: 25px; display: grid; place-items: center; border-radius: 50%; background: var(--ink); color: var(--panel); font-weight: 900; }
+.opening-player b, .opening-player small { display: block; }
+.opening-player small { color: var(--muted); font-size: .7rem; }
+.opening-player em { padding: 3px 7px; border-radius: 99px; background: var(--gold); color: white; font-size: .59rem; font-style: normal; font-weight: 900; letter-spacing: .06em; }
 .new-cards-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 10px; width: min(620px, 100%); margin: 18px auto; padding: 4px; }
 .new-card { position: relative; isolation: isolate; width: 100%; max-width: 116px; aspect-ratio: 2 / 3; display: flex; flex-direction: column; justify-content: space-between; justify-self: center; overflow: hidden; padding: 9px; border: 4px solid white; color: white; text-align: left; text-shadow: 0 1px 4px rgba(0,0,0,.9); box-shadow: 0 6px 15px rgba(35,32,27,.18); }
 .new-card::before { content: ""; position: absolute; inset: 0; z-index: -2; background: var(--art) center / cover; }
@@ -491,6 +499,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
     <p class="eyebrow">New cards added</p>
     <h2>Your fresh paintings</h2>
     <p>These were just added to your private hand.</p>
+    <div id="opening-order" class="opening-order hidden" aria-label="Player order"></div>
     <div id="new-cards-list" class="new-cards-list"></div>
     <button id="new-cards-close" class="primary big">Got it</button>
   </dialog>
@@ -506,7 +515,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.14.0";
+const VERSION = "0.14.1";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -1153,14 +1162,28 @@ function renderNewCards() {
   const dialog = $("#new-cards-dialog");
   const starter = state.players[state.startingPlayerId];
   const isOpeningDeal = state.round === 1 && state.openingAnnouncement;
+  const openingOrder = $("#opening-order");
   $(".new-cards-dialog > p:not(.eyebrow)").textContent = isOpeningDeal
     ? (isLocalPlayer(starter)
       ? "You were randomly chosen to go first. After this window closes, you play the first painting."
       : `${starter.name} was randomly chosen to go first. After this window closes, ${starter.name} plays the first painting.`)
     : "These were just added to your private hand.";
-  $("#new-cards-close").textContent = isOpeningDeal
-    ? `Start — ${isLocalPlayer(starter) ? "You go first" : `${starter.name} goes first`}`
-    : "Got it";
+  if (isOpeningDeal) {
+    const orderedPlayers = state.players
+      .slice(state.startingPlayerId)
+      .concat(state.players.slice(0, state.startingPlayerId));
+    openingOrder.innerHTML = `<strong>Opening order</strong>${orderedPlayers.map((player, index) => `
+      <div class="opening-player ${index === 0 ? "starts" : ""}">
+        <span class="opening-number">${index + 1}</span>
+        <span><b>${isLocalPlayer(player) ? "You" : player.name}</b><small>${isLocalPlayer(player) ? "Human player" : player.human ? "Human player" : "Computer player"}</small></span>
+        ${index === 0 ? "<em>GOES FIRST</em>" : ""}
+      </div>`).join("")}`;
+    openingOrder.classList.remove("hidden");
+  } else {
+    openingOrder.classList.add("hidden");
+    openingOrder.innerHTML = "";
+  }
+  $("#new-cards-close").textContent = isOpeningDeal ? "Begin game" : "Got it";
   $("#new-cards-list").innerHTML = cards.map(c => {
     const ar = artist(c.artist);
     return `<div class="new-card" style="--artist:${ar.color};--art:url('${ar.image}')">
