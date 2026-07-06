@@ -202,8 +202,8 @@ body.win-celebration::after { content: ""; position: fixed; z-index: 200; inset:
 .instruction { color: var(--muted); margin-bottom: 16px; }
 .thinking-note { display: block; margin-top: 4px; color: var(--gold); font-size: .75rem; font-weight: 850; }
 .live-actions { height: 66px; min-height: 66px; max-height: 66px; display: flex; flex-direction: column; gap: 1px; align-self: start; overflow: hidden; margin-top: 8px; padding: 7px 10px; border-left: 4px solid var(--gold); border-radius: 7px; background: var(--paper); color: var(--muted); text-align: left; font-size: .68rem; line-height: 1.13; }
-.live-actions > strong { color: var(--ink); font-size: .72rem; }
-.live-actions span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.live-actions > strong { flex: 0 0 auto; color: var(--ink); font-size: .72rem; }
+.live-actions span { flex: 0 0 auto; min-height: .78rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .live-actions b { color: var(--ink); }
 .auction-card { width: 170px; height: 215px; margin: 0 auto 14px; display: grid; align-content: space-between; padding: 12px; text-align: left; border: 8px solid white; background: linear-gradient(to bottom, rgba(0,0,0,.05) 45%, rgba(0,0,0,.78)), var(--art) center/cover; color: white; text-shadow: 0 1px 3px #000; box-shadow: 0 16px 30px rgba(0,0,0,.23); transform: rotate(-1deg); }
 .auction-card > strong { white-space: nowrap; font-size: clamp(.78rem, 1.1vw, .95rem); letter-spacing: -.02em; }
@@ -515,7 +515,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.14.5";
+const VERSION = "0.14.6";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
