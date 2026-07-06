@@ -515,7 +515,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.14.4";
+const VERSION = "0.14.5";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -842,9 +842,10 @@ function placeBid(p, amount) {
   if (a.card.type === "open" && p.passed) return;
   amount = Math.floor(+amount);
   if (amount <= state.auction.bid || amount > p.cash) return toast("Bid must be higher and within your cash.");
+  const isOpeningBid = state.auction.bidder === null;
   state.auction.bid = amount;
   state.auction.bidder = p.id;
-  p.status = `Bid ${money(amount)}`;
+  p.status = isOpeningBid ? `Bid ${money(amount)}` : `Raised to ${money(amount)}`;
   recordTurnAction(p, p.status);
   if (isLocalPlayer(p)) learnLocal("bids", amount);
   if (state.auction.card.type === "once") state.auction.acted.push(p.id);
