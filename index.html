@@ -109,6 +109,7 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 .guide-item small { font-size: .72rem; }
 .market { height: 192px; min-height: 192px; max-height: 192px; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 14px; overflow-x: auto; overflow-y: hidden; box-shadow: 0 7px 22px rgba(45,38,28,.09); }
 .market-grid { display: grid; grid-template-columns: 105px repeat(5, minmax(120px, 1fr)); min-width: 710px; }
+.mobile-market { display: none; }
 .market-cell, .market-label { min-height: 35px; display: flex; align-items: center; justify-content: center; padding: 6px 10px; border-right: 1px solid #e1dacf; border-bottom: 1px solid #e9e3d9; }
 .market-label { justify-content: flex-start; gap: 7px; background: #f1ece3; color: var(--muted); font-size: .72rem; font-weight: 800; letter-spacing: .03em; }
 .market-label.corner { color: var(--gold); letter-spacing: .12em; }
@@ -444,39 +445,77 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
   .value-forecast { width: min(420px, 100%); margin: auto; }
 }
 @media (max-width: 520px) {
+  html, body { max-width: 100%; overflow-x: hidden; }
+  body { font-size: 14px; }
   .game { padding: 10px; }
-  .topbar { align-items: flex-start; margin-bottom: 9px; }
+  .topbar { height: auto; min-height: 0; max-height: none; align-items: flex-start; margin-bottom: 9px; overflow: visible; }
   .topbar h1 { font-size: 1.65rem; }
   .top-actions { flex-wrap: wrap; justify-content: flex-end; gap: 5px; }
   .quiet { min-height: 38px; padding: 7px 9px; font-size: .73rem; }
-  .market-grid { grid-template-columns: 88px repeat(5, 108px); min-width: 628px; }
-  .market-cell, .market-label { padding: 5px 7px; }
-  .market-cell.round-count { min-height: 66px; }
-  .market-label span { font-size: .65rem; }
-  .opponents { display: flex; overflow-x: auto; padding: 3px; scroll-snap-type: x mandatory; }
-  .player { min-width: min(78vw, 260px); scroll-snap-align: start; }
-  .avatar-wrap { flex-basis: 40px; width: 40px; height: 40px; }
-  .table { grid-template-rows: 440px 240px 205px; gap: 9px; padding-top: 10px; }
-  .stage { height: 440px; min-height: 440px; max-height: 440px; padding: 16px 10px; }
-  .player-area { height: 205px; min-height: 205px; max-height: 205px; }
-  .stage-layout { gap: 18px; }
-  .auction-card { width: 145px; height: 180px; }
-  .auction-source { max-width: 92%; }
+  .market { height: auto; min-height: 0; max-height: none; overflow: visible; background: transparent; border: 0; box-shadow: none; }
+  .market-grid { display: none; }
+  .mobile-market { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  .mobile-market-card { position: relative; isolation: isolate; overflow: hidden; min-height: 108px; padding: 11px 12px; border: 1px solid var(--line); border-left: 6px solid var(--artist); border-radius: 13px; background: var(--panel); box-shadow: 0 5px 18px rgba(45,38,28,.08); }
+  .mobile-market-card.active { outline: 2px solid var(--artist); background: color-mix(in srgb, var(--artist) 11%, var(--panel)); }
+  .mobile-market-art { position: absolute; inset: 0 0 auto auto; z-index: -2; width: 42%; height: 100%; background: var(--art) center / cover; opacity: .18; }
+  .mobile-market-card::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, var(--panel) 35%, color-mix(in srgb, var(--panel) 70%, transparent)); }
+  .mobile-market-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .mobile-market-head strong { font: 800 1.04rem/1.1 Georgia, serif; }
+  .mobile-market-head b { color: #17633f; font-size: 1rem; }
+  .mobile-market-main { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0 7px; }
+  .mobile-market-main span { display: grid; gap: 1px; padding: 7px 9px; border-radius: 9px; background: color-mix(in srgb, var(--paper) 82%, white); }
+  .mobile-market-main b { color: var(--ink); font-size: 1.15rem; line-height: 1; }
+  .mobile-market-main small { color: var(--muted); font-size: .65rem; }
+  .mobile-market-main em { color: var(--muted); font-size: .68rem; font-style: normal; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+  .mobile-market-card .market-progress i { flex: 1; max-width: 24px; }
+  .mobile-market-card p { margin: 8px 0 0; color: var(--artist); font-size: .78rem; font-weight: 900; }
+  .opponents { display: grid; grid-template-columns: 1fr; overflow: visible; padding: 0; }
+  .player { min-width: 0; height: auto; min-height: 168px; max-height: none; padding: 10px; }
+  .avatar-wrap, .persona-avatar { flex-basis: 46px; width: 46px; min-width: 46px; height: 46px; }
+  .cash { min-width: 58px; padding: 6px 9px; font-size: 1rem; }
+  .player-event { flex-basis: 54px; height: 54px; min-height: 54px; max-height: 54px; }
+  .collection { min-height: 52px; max-height: 58px; overflow-x: auto; }
+  .table { display: grid; grid-template-rows: auto auto auto; gap: 9px; padding-top: 10px; padding-bottom: 28px; }
+  .stage { height: auto; min-height: 0; max-height: none; padding: 14px 10px; overflow: visible; }
+  .stage-layout { grid-template-columns: 1fr; gap: 14px; }
+  .auction-focus { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 8px 13px; align-items: center; text-align: left; }
+  .auction-source { grid-column: 1 / -1; justify-self: start; max-width: 100%; white-space: normal; border-radius: 18px; }
+  .auction-lot { grid-column: 1; grid-row: span 4; align-self: start; }
+  .auction-focus > h2, .auction-focus > .instruction, .auction-focus > .bid-row, .auction-focus > .actions, .auction-focus > .auction-copy, .auction-focus > .live-actions { grid-column: 2; }
+  .auction-focus > h2 { margin: 0; font-size: 1.35rem; }
+  .auction-card { width: 118px; height: 155px; border-width: 6px; margin: 0; }
+  .auction-lot.is-pair .auction-card + .auction-card { margin-left: -48px; transform: translate(34px, 10px) rotate(4deg); }
   .instruction { margin-bottom: 10px; }
   .bid-row { flex-wrap: wrap; }
   .bid-row input { width: 96px; }
   .bid-row button, .actions button { min-height: 44px; }
-  .value-forecast { padding: 15px; }
+  .value-forecast { grid-column: 1 / -1; width: 100%; padding: 13px; }
   .forecast-now strong { font-size: 1.6rem; }
   .forecast-now span { font-size: 1.05rem; }
+  .possible-values { margin: 10px 0 6px; }
   .your-summary { align-items: flex-start; }
   .your-summary > div:first-child { min-width: 0; }
   .hand-heading { align-items: baseline; }
-  .hand-card { flex-basis: 104px; height: 136px; }
+  .player-area { height: auto; min-height: 0; max-height: none; padding: 12px; overflow: visible; }
+  .hand { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; overflow: visible; padding: 10px 0 0; scroll-snap-type: none; }
+  .hand-card { width: 100%; min-width: 0; height: auto; aspect-ratio: 2 / 2.72; border-width: 4px; padding: 7px; }
+  .hand-card:hover { transform: none; }
+  .hand-card .card-type { left: 7px; right: 7px; bottom: 7px; grid-template-columns: 20px 1fr; font-size: .64rem; }
+  .hand-card .card-type b { font-size: .95rem; }
   .mini-art { width: 50px; height: 64px; }
   dialog { padding: 20px 16px; }
   .help-type { grid-template-columns: 30px 92px 1fr; font-size: .8rem; }
   .toast { width: calc(100% - 24px); text-align: center; }
+}
+@media (max-width: 390px) {
+  .topbar { display: grid; gap: 8px; }
+  .top-actions { justify-content: flex-start; }
+  .quiet { min-height: 34px; padding: 6px 8px; }
+  .auction-focus { grid-template-columns: 104px minmax(0, 1fr); gap: 8px 10px; }
+  .auction-card { width: 100px; height: 136px; }
+  .auction-focus > h2 { font-size: 1.18rem; }
+  .hand { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mobile-market-main { grid-template-columns: 1fr; }
 }
 
 </style>
@@ -644,7 +683,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.30.0";
+const VERSION = "0.31.0";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -1526,6 +1565,21 @@ function renderGuide() {
 function renderMarket() {
   const cell = (a, content, extra = "") =>
     `<div class="market-cell ${state.auction?.card.artist === a.id ? "active" : ""} ${extra}" style="--artist:${a.color}">${content}</div>`;
+  const artistMarketCards = ARTISTS.map(a => {
+    const count = state.tableCounts[a.id];
+    const earlier = state.roundHistory.reduce((sum, round) => sum + (round[a.id] || 0), 0);
+    const active = state.auction?.card.artist === a.id;
+    return `<article class="mobile-market-card ${active ? "active" : ""}" style="--artist:${a.color};--art:url('${a.image}')">
+      <div class="mobile-market-art"></div>
+      <div class="mobile-market-head"><strong>${a.name}</strong><b>${money(state.marketValues[a.id])}</b></div>
+      <div class="mobile-market-main">
+        <span><b>${count}<small>/5</small></b><em>this round</em></span>
+        <span><b>${earlier}</b><em>earlier</em></span>
+      </div>
+      <span class="market-progress">${Array.from({length:5}, (_,i) => `<i class="${i < count ? "filled" : ""}"></i>`).join("")}</span>
+      ${active ? `<p>${Math.max(0, 5 - count)} more painting${Math.max(0, 5 - count) === 1 ? "" : "s"} ends the round.</p>` : ""}
+    </article>`;
+  }).join("");
   $("#market").innerHTML = `<div class="market-grid">
     <div class="market-label corner">MARKET</div>
     ${ARTISTS.map(a => cell(a, `<span class="market-art" style="--art:url('${a.image}')"></span><strong>${a.name}</strong>`, "market-artist")).join("")}
@@ -1543,7 +1597,7 @@ function renderMarket() {
     ${ARTISTS.map(a => cell(a, `<strong>${state.roundHistory.reduce((sum, round) => sum + (round[a.id] || 0), 0)}</strong>`)).join("")}
     <div class="market-label" title="Current value of each painting">💰 <span>Value</span></div>
     ${ARTISTS.map(a => cell(a, `<strong>${money(state.marketValues[a.id])}</strong>`)).join("")}
-  </div>`;
+  </div><div class="mobile-market">${artistMarketCards}</div>`;
   requestAnimationFrame(() => {
     const market = $("#market");
     const active = market.querySelector(".market-artist.active");
