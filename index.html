@@ -570,7 +570,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.19.1";
+const VERSION = "0.19.2";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -1926,10 +1926,22 @@ $("#round-results-close").onclick = () => {
 renderStaticGuide();
 document.querySelectorAll("[data-version]").forEach(el => el.textContent = `v${VERSION}`);
 if (localStorage.getItem("gallery-auction-save-v2")) $("#continue-game").classList.remove("hidden");
+const savedPlayerName = localStorage.getItem("modern-art-player-name");
+if (savedPlayerName) $("#player-name").value = savedPlayerName;
+$("#player-name").addEventListener("change", event => {
+  const name = event.target.value.trim();
+  if (name) localStorage.setItem("modern-art-player-name", name);
+});
 const roomFromLink = new URLSearchParams(location.search).get("room");
 if (roomFromLink) {
   $("#room-code").value = roomFromLink.toUpperCase();
-  setRoomStatus(`Room ${roomFromLink.toUpperCase()} is ready to join.`);
+  if (!savedPlayerName && $("#player-name").value.trim() === "You") {
+    $("#player-name").value = `Guest ${Math.floor(100 + Math.random() * 900)}`;
+  }
+  setRoomStatus(`Invitation accepted. Joining room ${roomFromLink.toUpperCase()} automatically…`);
+  $("#host-game").disabled = true;
+  $("#join-game").disabled = true;
+  setTimeout(joinRoom, 150);
 }
 function renderStaticGuide() {
   $("#help-types").innerHTML = Object.values(TYPES).map(t =>
