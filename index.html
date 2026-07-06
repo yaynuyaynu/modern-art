@@ -469,7 +469,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
         <label>Your name
           <input id="player-name" maxlength="20" value="You" placeholder="Your name">
         </label>
-        <label>Your character
+        <label>Your persona
           <select id="character-select">
             <option value="fred" selected>Fred</option>
             <option value="greg">Greg</option>
@@ -614,7 +614,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.21.0";
+const VERSION = "0.21.1";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
