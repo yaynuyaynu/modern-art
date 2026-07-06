@@ -14,6 +14,15 @@
   --gold: #b67932;
   --shadow: 0 16px 44px rgba(42, 34, 23, .12);
 }
+[data-theme="dark"] {
+  --ink: #f4efe6;
+  --muted: #b8b0a5;
+  --paper: #201e1b;
+  --panel: #292622;
+  --line: #4d4841;
+  --gold: #e0a24f;
+  --shadow: 0 16px 44px rgba(0,0,0,.38);
+}
 
 * { box-sizing: border-box; }
 body {
@@ -23,6 +32,22 @@ body {
   font: 15px/1.4 Inter, ui-sans-serif, system-ui, sans-serif;
   min-height: 100vh;
 }
+[data-theme="dark"] body { background: linear-gradient(135deg, #131210, #211f1c 48%, #171512); }
+[data-theme="dark"] .setup-card,
+[data-theme="dark"] .player,
+[data-theme="dark"] .player-area,
+[data-theme="dark"] .stage,
+[data-theme="dark"] .history-sidebar { background: rgba(41,38,34,.97); }
+[data-theme="dark"] select,
+[data-theme="dark"] input,
+[data-theme="dark"] dialog,
+[data-theme="dark"] .value-forecast { background: #312e29; color: var(--ink); }
+[data-theme="dark"] .market-cell.market-artist,
+[data-theme="dark"] .market-cell { background-color: #292622; }
+[data-theme="dark"] .market-label { background: #201e1b; }
+[data-theme="dark"] .quiet { color: var(--ink); }
+[data-theme="dark"] .player.seller,
+[data-theme="dark"] .player-area.current-hand { background: #342d20; }
 button, select, input { font: inherit; }
 button { cursor: pointer; }
 .hidden { display: none !important; }
@@ -49,6 +74,7 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 .game { max-width: 1500px; margin: auto; padding: 18px; }
 .topbar { display: flex; justify-content: space-between; align-items: center; gap: 20px; height: 62px; min-height: 62px; max-height: 62px; margin-bottom: 14px; overflow: hidden; }
 .top-actions { display: flex; gap: 8px; }
+.options-button { border: 2px solid var(--gold); background: color-mix(in srgb, var(--gold) 13%, transparent); }
 .history-sidebar { position: fixed; z-index: 80; top: 14px; right: 14px; bottom: 14px; width: 286px; height: calc(100dvh - 28px); display: none; overflow: hidden; padding: 16px 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,253,248,.98); box-shadow: -12px 0 38px rgba(42,34,23,.18); }
 .history-sidebar.open { display: grid; grid-template-rows: auto minmax(0, 1fr); }
 .history-sidebar-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; padding: 2px 3px 12px; border-bottom: 1px solid var(--line); }
@@ -134,6 +160,14 @@ button:hover { filter: brightness(.97); transform: translateY(-1px); }
 .player-quote::after { content: ""; position: absolute; left: 18px; bottom: -10px; width: 16px; height: 16px; border-right: 2px solid #d7b65e; border-bottom: 2px solid #d7b65e; background: #fff4cf; transform: rotate(45deg); }
 @keyframes speech-pop { from { opacity: 0; transform: translateY(10px) scale(.72); } }
 @keyframes action-pop { from { opacity: 0; transform: scale(.88); } }
+body.win-celebration::after { content: ""; position: fixed; z-index: 200; inset: 6px; border: 8px solid #e0a24f; border-radius: 20px; pointer-events: none; animation: win-frame 1.7s ease-out both; }
+@keyframes win-frame {
+  0% { opacity: 0; box-shadow: inset 0 0 0 #fff2a6, 0 0 0 #e0a24f; }
+  20% { opacity: 1; box-shadow: inset 0 0 45px #fff2a6, 0 0 42px #e0a24f; }
+  45% { border-color: #65c98f; box-shadow: inset 0 0 24px #65c98f, 0 0 30px #65c98f; }
+  100% { opacity: 0; transform: scale(1.015); }
+}
+.player.current { transition: outline-color .35s, background-color .35s, box-shadow .35s; }
 .player-head { display: flex; justify-content: space-between; gap: 8px; }
 .player-head strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .seller-badge { display: inline-block; margin-left: 8px; padding: 2px 7px; border-radius: 99px; background: var(--gold); color: white; font-size: .58rem; letter-spacing: .08em; vertical-align: 2px; }
@@ -383,7 +417,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
         <h1 id="round-title">Round 1 of 4</h1>
       </div>
       <div class="top-actions">
-        <button id="options-button" class="quiet">Options</button>
+        <button id="options-button" class="quiet options-button">⚙ Settings</button>
         <button id="history-button" class="quiet">History <span id="history-count"></span></button>
         <button id="help-button" class="quiet">How to play</button>
         <button id="new-game" class="quiet">New game</button>
@@ -417,9 +451,16 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
     </label>
     <label>Computer pace
       <select id="ai-pace">
-        <option value="1800">Easy to follow</option>
-        <option value="1200">Normal</option>
+        <option value="2400">Easy to follow</option>
+        <option value="1600">Normal</option>
         <option value="700">Quick</option>
+      </select>
+    </label>
+    <label>Appearance
+      <select id="color-theme">
+        <option value="light">Light gallery</option>
+        <option value="dark">Dark gallery</option>
+        <option value="system">Match this device</option>
       </select>
     </label>
   </dialog>
@@ -457,7 +498,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.12.1";
+const VERSION = "0.13.0";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -540,9 +581,16 @@ const FAMILY_VOICE = {
 const familyQuipTimers = {};
 
 let state = null;
-let aiPace = +(localStorage.getItem("modern-art-ai-pace") || 1800);
+let aiPace = +(localStorage.getItem("modern-art-ai-pace") || 2400);
+if (![2400, 1600, 700].includes(aiPace)) aiPace = 2400;
 let historySidebarVisible = localStorage.getItem("modern-art-history-sidebar") === "true";
 function aiDelay(scale = 1) { return Math.round(aiPace * scale); }
+let colorTheme = localStorage.getItem("modern-art-theme") || "light";
+function applyTheme() {
+  const dark = colorTheme === "dark" || (colorTheme === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
+  document.documentElement.dataset.theme = dark ? "dark" : "light";
+}
+applyTheme();
 let networkMode = "solo";
 let localPlayerId = 0;
 let peer = null;
@@ -966,7 +1014,9 @@ function resolveAuction() {
     auctionResult(`${isLocalPlayer(buyer) ? "You win" : `${buyer.name} wins`} ${a.cards.length > 1 ? `two ${artist(a.card.artist).name} paintings` : artist(a.card.artist).name} for ${money(a.bid)}!`, buyer.id);
     state.history.push({ kind: "auction", round: state.round, artist: a.card.artist, auctionType: a.originalType, seller: seller.name, buyer: buyer.name, price: a.bid, quantity: a.cards.length });
   }
-  setTimeout(nextTurn, 700);
+  state.message = `${state.players[a.bidder ?? a.seller].name}'s result is shown below. The next auction will begin shortly.`;
+  render();
+  setTimeout(nextTurn, aiDelay(1.15));
 }
 
 function endRound(triggerCard) {
@@ -1324,6 +1374,13 @@ function roundResult(text) {
 function auctionResult(text, playerId, quipKind = "win") {
   state.players.forEach(p => { p.quip = ""; });
   state.playerNotices = { [playerId]: text };
+  if (playerId === localPlayerId && quipKind === "win") {
+    document.body.classList.remove("win-celebration");
+    void document.body.offsetWidth;
+    document.body.classList.add("win-celebration");
+    clearTimeout(auctionResult.celebrationTimer);
+    auctionResult.celebrationTimer = setTimeout(() => document.body.classList.remove("win-celebration"), 1800);
+  }
   render();
   clearTimeout(auctionResult.timers?.[playerId]);
   auctionResult.timers ||= {};
@@ -1485,6 +1542,7 @@ $(".dialog-close").onclick = () => $("#help-dialog").close();
 $("#options-button").onclick = () => {
   $("#show-history-sidebar").checked = historySidebarVisible;
   $("#ai-pace").value = String(aiPace);
+  $("#color-theme").value = colorTheme;
   $("#options-dialog").showModal();
 };
 $("#options-close").onclick = () => $("#options-dialog").close();
@@ -1502,6 +1560,11 @@ $("#history-sidebar-close").onclick = () => {
 $("#ai-pace").onchange = event => {
   aiPace = +event.target.value;
   localStorage.setItem("modern-art-ai-pace", String(aiPace));
+};
+$("#color-theme").onchange = event => {
+  colorTheme = event.target.value;
+  localStorage.setItem("modern-art-theme", colorTheme);
+  applyTheme();
 };
 $("#history-button").onclick = () => $("#history-dialog").showModal();
 $(".history-close").onclick = () => $("#history-dialog").close();
