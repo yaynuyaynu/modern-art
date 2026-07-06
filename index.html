@@ -237,6 +237,8 @@ body.win-celebration::after { content: ""; position: fixed; z-index: 200; inset:
 .lobby-players { display: grid; gap: 6px; margin-bottom: 10px; }
 .lobby-player { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: 8px; background: #f1eadc; font-weight: 800; }
 .lobby-player em { color: #23704d; font-size: .7rem; font-style: normal; letter-spacing: .05em; }
+.lobby-note { margin: 2px 0 10px; color: var(--muted); font-size: .78rem; }
+#copy-room-link { margin-top: 9px; }
 .online-pill { display: inline-block; margin-left: 8px; padding: 3px 7px; border-radius: 999px; color: #23704d; background: #e2f3e8; font: 800 .65rem/1 sans-serif; vertical-align: middle; }
 .darkstaff-mark, .game-footer { color: #7b7062; font: 600 .72rem/1.2 sans-serif; letter-spacing: .08em; text-transform: uppercase; }
 .darkstaff-mark { margin-top: 15px; text-align: center; }
@@ -458,9 +460,11 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
           <button id="join-game" class="quiet">Join room</button>
         </div>
         <div id="room-status" class="room-status"></div>
+        <button id="copy-room-link" class="quiet hidden">Copy invitation link</button>
         <section id="lobby-panel" class="lobby-panel hidden" aria-live="polite">
           <div class="lobby-heading"><strong>Room lobby</strong><span id="lobby-count"></span></div>
           <div id="lobby-players" class="lobby-players"></div>
+          <p class="lobby-note">Keep this page open while everyone joins.</p>
           <button id="start-lobby-game" class="primary hidden">Start game</button>
         </section>
       </div>
@@ -562,7 +566,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.18.0";
+const VERSION = "0.18.1";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -668,6 +672,7 @@ let guestConnections = [];
 let roomId = "";
 let lobbyPlayers = [];
 let lobbyMaxPlayers = 4;
+let roomInviteLink = "";
 let seenDealId = "";
 const $ = (s) => document.querySelector(s);
 const money = (n) => `${Math.max(0, Math.round(n))}`;
@@ -1673,14 +1678,17 @@ function createRoom() {
   lobbyMaxPlayers = +$("#player-count").value;
   lobbyPlayers = [{ name: $("#player-name").value.trim() || "Host", characterKey: $("#character-select").value }];
   guestConnections = [];
-  const code = makeRoomCode();
+  const requestedCode = $("#room-code").value.trim().toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 12);
+  const code = requestedCode || makeRoomCode();
   roomId = peerIdFromCode(code);
   setRoomStatus("Creating your room…");
   peer = new Peer(roomId);
   peer.on("open", () => {
-    const link = `${location.origin}${location.pathname}?room=${code}`;
-    setRoomStatus(`Room <strong>${code}</strong> is ready. <a href="${link}">Copy or send this link</a>. Waiting for Greg…`);
+    roomInviteLink = `${location.origin}${location.pathname}?room=${code}`;
+    setRoomStatus(`Room <strong>${code}</strong> is open. Waiting for players.`);
     $("#room-code").value = code;
+    $("#copy-room-link").classList.remove("hidden");
+    $("#host-game").disabled = true;
     renderLobby();
   });
   peer.on("connection", connection => {
@@ -1703,12 +1711,18 @@ function createRoom() {
       }
     });
   });
-  peer.on("error", error => setRoomStatus(`Could not create the room: ${error.type || "connection error"}.`));
+  peer.on("error", error => {
+    $("#host-game").disabled = false;
+    const message = error.type === "unavailable-id"
+      ? `Room <strong>${code}</strong> is already in use. Choose another code.`
+      : `Could not create the room: ${error.type || "connection error"}.`;
+    setRoomStatus(message);
+  });
 }
 function joinRoom() {
   if (typeof Peer === "undefined") return setRoomStatus("Online play could not load. Check your connection and refresh.");
   const code = $("#room-code").value.trim();
-  if (!code) return setRoomStatus("Enter the room code Greg sent you.");
+  if (!code) return setRoomStatus("Enter the room code the host sent you.");
   networkMode = "guest";
   localPlayerId = 1;
   setRoomStatus("Joining the room…");
@@ -1716,7 +1730,7 @@ function joinRoom() {
   peer.on("open", () => {
     hostConnection = peer.connect(peerIdFromCode(code), { reliable: true });
     hostConnection.on("open", () => {
-      setRoomStatus("Connected. Waiting for the table…");
+      setRoomStatus("Connected. Waiting in the lobby…");
       hostConnection.send({
         type: "hello",
         name: $("#player-name").value.trim() || "Guest",
@@ -1725,9 +1739,11 @@ function joinRoom() {
     });
     hostConnection.on("data", handleGuestMessage);
     hostConnection.on("close", () => toast("The host disconnected."));
-    hostConnection.on("error", () => setRoomStatus("Could not connect to that room."));
+    hostConnection.on("error", () => setRoomStatus("Room not found. Ask the host to keep the lobby page open and recheck the code."));
   });
-  peer.on("error", error => setRoomStatus(`Could not join: ${error.type || "connection error"}.`));
+  peer.on("error", error => setRoomStatus(error.type === "peer-unavailable"
+    ? "Room not found. Ask the host to keep the lobby page open and recheck the code."
+    : `Could not join: ${error.type || "connection error"}.`));
 }
 function handleGuestMessage(message) {
   if (message?.type === "error") return setRoomStatus(message.message);
@@ -1804,6 +1820,15 @@ $("#start-game").onclick = startGame;
 $("#host-game").onclick = createRoom;
 $("#join-game").onclick = joinRoom;
 $("#start-lobby-game").onclick = startLobbyGame;
+$("#copy-room-link").onclick = async () => {
+  if (!roomInviteLink) return;
+  try {
+    await navigator.clipboard.writeText(roomInviteLink);
+    setRoomStatus(`Invitation copied for room <strong>${roomCodeFromId(roomId)}</strong>. Keep this lobby open.`);
+  } catch {
+    setRoomStatus(`Copy this invitation: <strong>${roomInviteLink}</strong>`);
+  }
+};
 $("#new-game").onclick = () => { localStorage.removeItem("gallery-auction-save-v2"); location.reload(); };
 $("#continue-game").onclick = () => {
   state = JSON.parse(localStorage.getItem("gallery-auction-save-v2"));
