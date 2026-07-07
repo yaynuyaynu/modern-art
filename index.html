@@ -449,63 +449,87 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 }
 @media (max-width: 520px) {
   html, body { max-width: 100%; overflow-x: hidden; }
-  body { font-size: 14px; }
-  .game { padding: 10px; }
-  .topbar { height: auto; min-height: 0; max-height: none; align-items: flex-start; margin-bottom: 9px; overflow: visible; }
-  .topbar h1 { font-size: 1.65rem; }
+  body { font-size: 13px; background: #f3eee5; }
+  .game { padding: 7px; }
+  .topbar { position: sticky; top: 0; z-index: 30; height: auto; min-height: 0; max-height: none; align-items: center; margin: -7px -7px 6px; padding: 7px; overflow: visible; background: color-mix(in srgb, var(--paper) 88%, white); border-bottom: 1px solid var(--line); }
+  .topbar h1 { font-size: 1.3rem; margin: 0; }
+  .topbar .eyebrow { display: none; }
   .top-actions { flex-wrap: wrap; justify-content: flex-end; gap: 5px; }
-  .quiet { min-height: 38px; padding: 7px 9px; font-size: .73rem; }
+  .quiet { min-height: 32px; padding: 6px 8px; font-size: .68rem; }
   .market { height: auto; min-height: 0; max-height: none; overflow: visible; background: transparent; border: 0; box-shadow: none; }
   .market-grid { display: none; }
-  .mobile-market { display: grid; grid-template-columns: 1fr; gap: 8px; }
-  .mobile-market-card { position: relative; isolation: isolate; overflow: hidden; min-height: 108px; padding: 11px 12px; border: 1px solid var(--line); border-left: 6px solid var(--artist); border-radius: 13px; background: var(--panel); box-shadow: 0 5px 18px rgba(45,38,28,.08); }
+  .mobile-market { display: flex; gap: 7px; overflow-x: auto; padding: 1px 1px 8px; scroll-snap-type: x proximity; }
+  .mobile-market-card { position: relative; isolation: isolate; flex: 0 0 132px; min-height: 82px; overflow: hidden; padding: 8px 9px; border: 1px solid var(--line); border-left: 5px solid var(--artist); border-radius: 12px; background: var(--panel); box-shadow: 0 3px 12px rgba(45,38,28,.07); scroll-snap-align: start; }
   .mobile-market-card.active { outline: 2px solid var(--artist); background: color-mix(in srgb, var(--artist) 11%, var(--panel)); }
-  .mobile-market-art { position: absolute; inset: 0 0 auto auto; z-index: -2; width: 42%; height: 100%; background: var(--art) center / cover; opacity: .18; }
+  .mobile-market-art { position: absolute; inset: 0 0 auto auto; z-index: -2; width: 54%; height: 100%; background: var(--art) center / cover; opacity: .16; }
   .mobile-market-card::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, var(--panel) 35%, color-mix(in srgb, var(--panel) 70%, transparent)); }
   .mobile-market-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-  .mobile-market-head strong { font: 800 1.04rem/1.1 Georgia, serif; }
-  .mobile-market-head b { color: #17633f; font-size: 1rem; }
-  .mobile-market-main { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0 7px; }
-  .mobile-market-main span { display: grid; gap: 1px; padding: 7px 9px; border-radius: 9px; background: color-mix(in srgb, var(--paper) 82%, white); }
-  .mobile-market-main b { color: var(--ink); font-size: 1.15rem; line-height: 1; }
-  .mobile-market-main small { color: var(--muted); font-size: .65rem; }
-  .mobile-market-main em { color: var(--muted); font-size: .68rem; font-style: normal; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
-  .mobile-market-card .market-progress i { flex: 1; max-width: 24px; }
-  .mobile-market-card p { margin: 8px 0 0; color: var(--artist); font-size: .78rem; font-weight: 900; }
-  .opponents { display: grid; grid-template-columns: 1fr; overflow: visible; padding: 0; }
-  .player { min-width: 0; height: auto; min-height: 168px; max-height: none; padding: 10px; }
-  .avatar-wrap, .persona-avatar { flex-basis: 46px; width: 46px; min-width: 46px; height: 46px; }
-  .cash { min-width: 58px; padding: 6px 9px; font-size: 1rem; }
-  .player-event { flex-basis: 54px; height: 54px; min-height: 54px; max-height: 54px; }
-  .collection { min-height: 52px; max-height: 58px; overflow-x: auto; }
-  .table { display: grid; grid-template-rows: auto auto auto; gap: 9px; padding-top: 10px; padding-bottom: 28px; }
-  .stage { height: auto; min-height: 0; max-height: none; padding: 14px 10px; overflow: visible; }
-  .stage-layout { grid-template-columns: 1fr; gap: 14px; }
-  .auction-focus { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 8px 13px; align-items: center; text-align: left; }
-  .auction-source { grid-column: 1 / -1; justify-self: start; max-width: 100%; white-space: normal; border-radius: 18px; }
+  .mobile-market-head strong { max-width: 76px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 800 .9rem/1.1 Georgia, serif; }
+  .mobile-market-head b { color: #17633f; font-size: .9rem; }
+  .mobile-market-main { display: flex; gap: 5px; margin: 7px 0 6px; }
+  .mobile-market-main span { display: flex; align-items: baseline; gap: 2px; padding: 4px 6px; border-radius: 8px; background: color-mix(in srgb, var(--paper) 82%, white); }
+  .mobile-market-main b { color: var(--ink); font-size: .95rem; line-height: 1; }
+  .mobile-market-main small { color: var(--muted); font-size: .55rem; }
+  .mobile-market-main em { color: var(--muted); font-size: .55rem; font-style: normal; font-weight: 800; text-transform: uppercase; letter-spacing: .03em; }
+  .mobile-market-card .market-progress i { flex: 1; width: auto; max-width: 18px; height: 4px; }
+  .mobile-market-card p { margin: 5px 0 0; color: var(--artist); font-size: .66rem; font-weight: 900; }
+  .table { display: flex; flex-direction: column; gap: 7px; padding-top: 2px; padding-bottom: 18px; }
+  .stage { order: 1; height: auto; min-height: 0; max-height: none; padding: 9px; overflow: visible; border-radius: 12px; }
+  #you { order: 2; }
+  #opponents { order: 3; }
+  .stage-layout { grid-template-columns: 1fr; gap: 8px; }
+  .auction-focus { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 6px 10px; align-items: center; text-align: left; }
+  .auction-source { grid-column: 1 / -1; justify-self: start; max-width: 100%; padding: 4px 9px 4px 5px; white-space: normal; border-radius: 14px; }
+  .auction-source .persona-avatar { flex-basis: 30px; width: 30px; min-width: 30px; height: 30px; }
+  .auction-source small { font-size: .63rem; }
   .auction-lot { grid-column: 1; grid-row: span 4; align-self: start; }
   .auction-focus > h2, .auction-focus > .instruction, .auction-focus > .bid-row, .auction-focus > .actions, .auction-focus > .auction-copy, .auction-focus > .live-actions { grid-column: 2; }
-  .auction-focus > h2 { margin: 0; font-size: 1.35rem; }
-  .auction-card { width: 118px; height: 155px; border-width: 6px; margin: 0; }
-  .auction-lot.is-pair .auction-card + .auction-card { margin-left: -48px; transform: translate(34px, 10px) rotate(4deg); }
-  .instruction { margin-bottom: 10px; }
+  .auction-focus > h2 { margin: 0; font-size: 1.08rem; line-height: 1.1; }
+  .auction-card { width: 88px; height: 118px; border-width: 4px; margin: 0; padding: 7px; }
+  .auction-card > strong { font-size: .7rem; }
+  .auction-card .type { font-size: .66rem; line-height: 1.05; }
+  .auction-lot.is-pair .auction-card + .auction-card { margin-left: -42px; transform: translate(30px, 9px) rotate(4deg); }
+  .instruction { margin-bottom: 6px; font-size: .78rem; line-height: 1.25; }
+  .thinking-note { display: none; }
+  .turn-guidance { margin-bottom: 4px; padding: 4px 8px; font-size: .58rem; }
   .bid-row { flex-wrap: wrap; }
-  .bid-row input { width: 96px; }
-  .bid-row button, .actions button { min-height: 44px; }
-  .value-forecast { grid-column: 1 / -1; width: 100%; padding: 13px; }
-  .forecast-now strong { font-size: 1.6rem; }
-  .forecast-now span { font-size: 1.05rem; }
-  .possible-values { margin: 10px 0 6px; }
+  .bid-row input { width: 80px; min-height: 38px; padding: 7px 9px; }
+  .bid-row button, .actions button { min-height: 38px; padding: 8px 11px; }
+  .actions { justify-content: flex-start; margin-top: 7px; }
+  .live-actions { grid-column: 1 / -1 !important; height: 38px; min-height: 38px; max-height: 38px; padding: 5px 8px; font-size: .6rem; }
+  .value-forecast { grid-column: 1 / -1; width: 100%; padding: 9px 10px; border-top-width: 4px; }
+  .value-forecast .eyebrow { font-size: .58rem; }
+  .forecast-now { margin: 5px 0; }
+  .forecast-now strong { font-size: 1.2rem; }
+  .forecast-now span { font-size: .92rem; }
+  .value-forecast > p:not(.eyebrow), .value-forecast > small { display: none; }
+  .pair-total { margin: 7px 0; padding: 8px; }
+  .possible-values { margin: 7px 0 0; }
+  .possible-values span { padding: 6px 3px; }
+  .opponents { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; overflow: visible; padding: 0; }
+  .player { min-width: 0; height: auto; min-height: 108px; max-height: none; padding: 8px; border-radius: 12px; }
+  .avatar-wrap, .persona-avatar { flex-basis: 34px; width: 34px; min-width: 34px; height: 34px; }
+  .player-profile { gap: 7px; }
+  .player-head { gap: 5px; }
+  .player-head strong { font-size: .84rem; }
+  .player-copy small { font-size: .68rem; }
+  .cash { min-width: 48px; padding: 5px 7px; font-size: .9rem; }
+  .player-event { flex-basis: 34px; height: 34px; min-height: 34px; max-height: 34px; margin-top: 6px; padding: 4px 6px; font-size: .58rem; line-height: 1.08; }
+  .collection { display: none; }
+  .player-quote { max-width: min(210px, 78vw); font-size: .72rem; }
   .your-summary { align-items: flex-start; }
   .your-summary > div:first-child { min-width: 0; }
-  .hand-heading { align-items: baseline; }
-  .player-area { height: auto; min-height: 0; max-height: none; padding: 12px; overflow: visible; }
-  .hand { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; overflow: visible; padding: 10px 0 0; scroll-snap-type: none; }
-  .hand-card { width: 100%; min-width: 0; height: auto; aspect-ratio: 2 / 2.72; border-width: 4px; padding: 7px; }
+  .hand-heading { align-items: center; }
+  .hand-heading .section-note { display: none; }
+  .hand-heading span { font-size: .68rem; }
+  .player-area { height: auto; min-height: 0; max-height: none; padding: 9px; overflow: visible; border-radius: 12px; }
+  .hand { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; overflow: visible; padding: 8px 0 0; scroll-snap-type: none; }
+  .hand-card { width: 100%; min-width: 0; height: auto; aspect-ratio: 2 / 2.65; border-width: 3px; padding: 5px; }
   .hand-card:hover { transform: none; }
-  .hand-card .card-type { left: 7px; right: 7px; bottom: 7px; grid-template-columns: 20px 1fr; font-size: .64rem; }
-  .hand-card .card-type b { font-size: .95rem; }
-  .mini-art { width: 50px; height: 64px; }
+  .hand-card .card-artist { font-size: .68rem; line-height: 1.05; }
+  .hand-card .card-type { left: 5px; right: 5px; bottom: 5px; grid-template-columns: 16px 1fr; font-size: .55rem; }
+  .hand-card .card-type b { font-size: .78rem; }
+  .mini-art { width: 36px; height: 46px; }
   dialog { padding: 20px 16px; }
   .help-type { grid-template-columns: 30px 92px 1fr; font-size: .8rem; }
   .toast { width: calc(100% - 24px); text-align: center; }
@@ -517,11 +541,11 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
   .topbar { display: grid; gap: 8px; }
   .top-actions { justify-content: flex-start; }
   .quiet { min-height: 34px; padding: 6px 8px; }
-  .auction-focus { grid-template-columns: 104px minmax(0, 1fr); gap: 8px 10px; }
-  .auction-card { width: 100px; height: 136px; }
-  .auction-focus > h2 { font-size: 1.18rem; }
-  .hand { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .mobile-market-main { grid-template-columns: 1fr; }
+  .auction-focus { grid-template-columns: 84px minmax(0, 1fr); gap: 6px 9px; }
+  .auction-card { width: 80px; height: 108px; }
+  .auction-focus > h2 { font-size: 1rem; }
+  .hand { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .opponents { grid-template-columns: 1fr; }
 }
 
 </style>
@@ -689,7 +713,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.32.0";
+const VERSION = "0.33.0";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
