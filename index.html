@@ -65,6 +65,21 @@ h1 { margin-bottom: 4px; font: 700 clamp(1.5rem, 3vw, 2.35rem)/1.1 Georgia, seri
 .game-promise span { display: grid; gap: 2px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: color-mix(in srgb, var(--panel) 86%, var(--gold)); }
 .game-promise b { color: var(--gold); font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; }
 .game-promise small { color: var(--muted); font-size: .72rem; }
+.hall-of-fame { margin: 14px 0 0; padding: 12px; border: 1px solid color-mix(in srgb, var(--gold) 42%, var(--line)); border-radius: 14px; background: linear-gradient(145deg, #fffaf0, color-mix(in srgb, var(--paper) 88%, var(--gold))); box-shadow: 0 8px 22px rgba(45,38,28,.08); }
+.hall-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 9px; }
+.hall-head h2 { margin: 0; font-size: 1.15rem; }
+.hall-head .eyebrow { margin: 0 0 2px; }
+.hall-head > span { color: var(--muted); font-size: .72rem; text-align: right; }
+.hall-best { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: center; margin-bottom: 9px; padding: 10px 12px; border-radius: 11px; background: linear-gradient(145deg, #27231d, #4b3822); color: white; }
+.hall-best small { grid-column: 1 / -1; color: #e7bd67; font-size: .62rem; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+.hall-best strong { font: 800 1.25rem/1.05 Georgia, serif; }
+.hall-best b { color: #f0c96a; font-size: 1.35rem; }
+.hall-best span { grid-column: 1 / -1; color: #ddd6cc; font-size: .72rem; }
+.hall-list { display: grid; gap: 5px; }
+.hall-row { display: grid; grid-template-columns: 26px 1fr auto auto; gap: 8px; align-items: center; padding: 7px 9px; border-radius: 8px; background: rgba(255,255,255,.58); font-size: .78rem; }
+.hall-row > span { width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; background: var(--gold); color: white; font-weight: 900; }
+.hall-row b { color: #17633f; }
+.hall-row small { color: var(--muted); }
 .setup-note { margin: -10px 0 20px; color: var(--muted); font-size: .82rem; }
 .setup-grid { display: grid; grid-template-columns: 1.2fr .65fr 1fr 1.7fr; gap: 14px; margin: 24px 0; }
 .setup-grid > label { min-width: 0; }
@@ -376,6 +391,226 @@ body.win-celebration::after { content: ""; position: fixed; z-index: 200; inset:
   .lobby-player .seat-configuration { grid-template-columns: 105px 1fr; }
   .bot-seat-options { grid-template-columns: 1fr !important; }
 }
+@media (min-width: 521px) {
+  .game { max-width: 1420px; padding: 10px 14px; }
+  .topbar { height: 46px; min-height: 46px; max-height: 46px; margin-bottom: 8px; }
+  .topbar h1 { font-size: clamp(1.85rem, 3vw, 2.7rem); line-height: .95; }
+  .topbar .eyebrow { margin-bottom: 1px; font-size: .68rem; }
+  .top-actions { gap: 7px; }
+  .quiet { min-height: 36px; padding: 8px 12px; }
+  .market { height: 138px; min-height: 138px; max-height: 138px; }
+  .market-grid { grid-template-columns: 92px repeat(5, minmax(112px, 1fr)); min-width: 650px; }
+  .market-cell, .market-label { min-height: 29px; padding: 4px 8px; }
+  .market-cell.market-artist { min-height: 42px; font-size: .9rem; }
+  .market-cell.round-count { min-height: 54px; }
+  .round-cell { gap: 3px; }
+  .round-cell > strong { font-size: 1.05rem; }
+  .market-progress i { width: 13px; height: 4px; }
+  .table { grid-template-rows: 290px 162px minmax(160px, auto); gap: 8px; padding: 8px 0 28px; }
+  .stage { height: 290px; min-height: 290px; max-height: 290px; padding: 10px 14px; }
+  .stage-inner { width: min(980px, 100%); }
+  .stage-layout { grid-template-columns: minmax(430px, 1fr) minmax(220px, 305px); gap: clamp(16px, 3vw, 34px); }
+  .auction-focus { grid-template-columns: 160px minmax(250px, 1fr); column-gap: 18px; }
+  .auction-source { margin-bottom: 4px; padding: 5px 10px 5px 5px; }
+  .auction-source small { font-size: .66rem; }
+  .persona-avatar.seller-avatar-photo { flex-basis: 38px; width: 38px; min-width: 38px; max-width: 38px; height: 38px; min-height: 38px; max-height: 38px; }
+  .auction-lot { min-height: 176px; }
+  .auction-card { width: 132px; height: 168px; margin-bottom: 6px; padding: 9px; border-width: 6px; }
+  .auction-lot.is-pair { padding-right: 30px; }
+  .auction-lot.is-pair .auction-card + .auction-card { margin-left: -50px; transform: translate(32px, 8px) rotate(4deg); }
+  .auction-focus > h2 { margin-bottom: 0; font-size: 1.35rem; line-height: 1.05; }
+  .auction-focus > .instruction { margin: 3px 0 7px; }
+  .instruction { font-size: .85rem; line-height: 1.25; }
+  .auction-copy { font-size: .9rem; }
+  .auction-focus > .actions,
+  .auction-focus > .bid-row {
+    padding: 5px 8px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--gold) 9%, transparent);
+  }
+  .turn-guidance { margin-bottom: 4px; padding: 4px 9px; font-size: .61rem; }
+  .bid-row input { width: 92px; min-height: 38px; padding: 7px 10px; }
+  .bid-row button, .actions button { min-height: 38px; padding: 8px 13px; }
+  .actions { margin-top: 8px; }
+  .live-actions { height: 48px; min-height: 48px; max-height: 48px; margin-top: 6px; padding: 5px 9px; font-size: .62rem; }
+  .live-actions > strong { font-size: .66rem; }
+  .value-forecast { padding: 14px 16px; }
+  .value-forecast .eyebrow { font-size: .62rem; }
+  .forecast-now { margin: 6px 0 1px; }
+  .forecast-now strong { font-size: 1.62rem; }
+  .forecast-now span { font-size: 1rem; }
+  .value-forecast > p:not(.eyebrow) { font-size: .72rem; line-height: 1.25; }
+  .pair-total { margin: 8px 0; padding: 8px 9px; }
+  .possible-values { margin: 9px 0 6px; gap: 5px; }
+  .possible-values span { padding: 6px 3px; }
+  .player { height: 162px; min-height: 162px; max-height: 162px; padding: 8px 10px; }
+  .opponents { gap: 8px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+  .player-profile { gap: 8px; }
+  .avatar-wrap { flex-basis: 38px; width: 38px; height: 38px; }
+  .you-avatar { flex-basis: 38px; width: 38px; height: 38px; font-size: .52rem; }
+  .player-head strong { font-size: .88rem; }
+  .player-copy small { font-size: .68rem; }
+  .cash { min-width: 58px; padding: 6px 10px; font-size: 1rem; }
+  .player-event { flex-basis: 42px; height: 42px; min-height: 42px; max-height: 42px; margin-top: 7px; padding: 4px 7px; font-size: .6rem; }
+  .collection { min-height: 40px; max-height: 43px; margin-top: 5px; gap: 3px; overflow: hidden; }
+  .collection .mini-art { width: 32px; height: 40px; border-width: 2px; }
+  .collection .mini-art b { font-size: .42rem; }
+  .collection .mini-art small { width: 13px; height: 13px; font-size: .48rem; }
+  .player-area { min-height: 160px; padding: 8px 12px; }
+  .owned-panel { margin-bottom: 7px; padding: 7px 10px; }
+  .owned-cards { min-height: 24px; margin-top: 5px; }
+  .owned-cards .mini-art { width: 34px; height: 43px; }
+  .hand { display: grid; grid-template-columns: repeat(auto-fit, minmax(82px, 98px)); gap: 7px; overflow: visible; padding: 8px 2px 4px; scroll-snap-type: none; }
+  .hand-card { width: 100%; min-width: 0; height: auto; aspect-ratio: 2 / 2.62; flex-basis: auto; border-width: 4px; padding: 6px; }
+  .hand-card:hover { transform: translateY(-3px) rotate(-1deg); }
+  .hand-card .card-artist { font-size: .72rem; line-height: 1.05; }
+  .hand-card .card-type { left: 6px; right: 6px; bottom: 6px; grid-template-columns: 17px 1fr; font-size: .56rem; }
+  .hand-card .card-type b { font-size: .82rem; }
+}
+@media (min-width: 900px) {
+  body { overflow-x: hidden; }
+  .game { max-width: 1600px; height: 100dvh; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; gap: 8px; overflow: hidden; }
+  .topbar { margin-bottom: 0; }
+  .market { height: 126px; min-height: 126px; max-height: 126px; }
+  .market-grid { grid-template-columns: 86px repeat(5, minmax(112px, 1fr)); }
+  .market-cell.market-artist { min-height: 38px; }
+  .market-cell.round-count { min-height: 48px; }
+  .table {
+    min-height: 0;
+    height: auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 390px);
+    grid-template-rows: minmax(260px, 1fr) 150px;
+    grid-template-areas:
+      "stage handrail"
+      "players handrail";
+    gap: 8px;
+    padding: 0;
+    overflow: hidden;
+  }
+  .stage {
+    grid-area: stage;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    padding: 10px 14px;
+    overflow: hidden;
+  }
+  .stage-inner { width: 100%; }
+  .stage-layout {
+    height: 100%;
+    grid-template-columns: minmax(390px, 1fr) minmax(220px, 300px);
+    gap: clamp(14px, 2.5vw, 30px);
+  }
+  .auction-focus { grid-template-columns: 150px minmax(220px, 1fr); column-gap: 16px; }
+  .auction-lot { min-height: 166px; }
+  .auction-card { width: 124px; height: 158px; }
+  .auction-focus > h2 { font-size: 1.25rem; }
+  .instruction { font-size: .82rem; }
+  .live-actions { height: 42px; min-height: 42px; max-height: 42px; }
+  .value-forecast { max-width: 300px; padding: 12px 14px; }
+  .forecast-now strong { font-size: 1.45rem; }
+  .forecast-now span { font-size: .94rem; }
+  .possible-values { margin-top: 7px; }
+  #opponents {
+    grid-area: players;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 7px;
+    overflow: hidden;
+  }
+  .player {
+    height: 150px;
+    min-height: 150px;
+    max-height: 150px;
+    padding: 8px 9px;
+    overflow: hidden;
+  }
+  .player-profile { gap: 7px; }
+  .avatar-wrap, .you-avatar { flex-basis: 36px; width: 36px; height: 36px; }
+  .player-head strong { font-size: .82rem; }
+  .player-copy small { font-size: .64rem; }
+  .cash { min-width: 54px; padding: 5px 8px; font-size: .92rem; }
+  .player-event { height: 38px; min-height: 38px; max-height: 38px; flex-basis: 38px; font-size: .58rem; }
+  .collection { max-height: 34px; min-height: 34px; }
+  .collection .mini-art { width: 27px; height: 34px; }
+  #you {
+    grid-area: handrail;
+    min-height: 0;
+    height: 100%;
+    max-height: none;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 8px;
+    overflow: hidden;
+    padding: 10px;
+    border-width: 2px;
+  }
+  #you.current-hand { box-shadow: 0 0 0 4px rgba(220,166,82,.2), 0 8px 24px rgba(182,121,50,.16); }
+  #you .owned-panel {
+    margin: 0;
+    padding: 8px;
+  }
+  #you .owned-cards {
+    max-height: 78px;
+    overflow-y: auto;
+    align-content: start;
+  }
+  #you .owned-cards .mini-art {
+    width: 36px;
+    height: 46px;
+  }
+  #you .hand-panel {
+    min-height: 0;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    overflow: hidden;
+  }
+  #you .hand-heading {
+    align-items: start;
+    margin-bottom: 4px;
+  }
+  #you .hand-heading strong { font-size: .92rem; }
+  #you .section-note { display: none; }
+  #you .hand {
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(74px, 1fr));
+    align-content: start;
+    gap: 7px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 5px 2px 8px;
+  }
+  #you .hand-card {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 2 / 2.62;
+    min-width: 0;
+    border-width: 4px;
+    padding: 6px;
+  }
+  #you .hand-card .card-artist { font-size: .68rem; }
+  #you .hand-card .card-type { left: 5px; right: 5px; bottom: 5px; grid-template-columns: 16px 1fr; font-size: .52rem; }
+  .game-footer { display: none; }
+}
+@media (min-width: 900px) and (max-height: 760px) {
+  .topbar { height: 40px; min-height: 40px; max-height: 40px; }
+  .topbar h1 { font-size: 1.9rem; }
+  .market { height: 108px; min-height: 108px; max-height: 108px; }
+  .market-cell, .market-label { min-height: 25px; padding-top: 3px; padding-bottom: 3px; }
+  .market-cell.market-artist { min-height: 34px; }
+  .market-cell.round-count { min-height: 40px; }
+  .table { grid-template-rows: minmax(232px, 1fr) 132px; }
+  .auction-card { width: 104px; height: 132px; }
+  .auction-lot { min-height: 140px; }
+  .player { height: 132px; min-height: 132px; max-height: 132px; }
+  .player-event { height: 30px; min-height: 30px; max-height: 30px; flex-basis: 30px; }
+  .collection { max-height: 28px; min-height: 28px; }
+  .collection .mini-art { width: 23px; height: 29px; }
+  #you .hand { grid-template-columns: repeat(auto-fill, minmax(66px, 1fr)); gap: 6px; }
+}
 .value-forecast > p:not(.eyebrow) { color: var(--muted); font-size: .78rem; }
 .possible-values { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 16px 0 9px; }
 .possible-values span { display: grid; gap: 2px; padding: 8px 4px; border-radius: 7px; background: #f3eee6; text-align: center; font-weight: 900; }
@@ -614,6 +849,385 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
   .opponents { grid-template-columns: 1fr; }
 }
 
+/* PC cockpit layout: market + auction + players + private hand all stay in one screen. */
+@media (min-width: 900px) {
+  body { overflow: hidden; }
+  .game { max-width: 1600px; height: 100dvh; display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: 8px; overflow: hidden; padding: 10px 14px; }
+  .topbar { height: 46px; min-height: 46px; max-height: 46px; margin-bottom: 0; }
+  .topbar h1 { font-size: clamp(1.85rem, 3vw, 2.65rem); line-height: .95; }
+  .topbar .eyebrow { margin-bottom: 1px; font-size: .68rem; }
+  .top-actions { gap: 7px; }
+  .quiet { min-height: 36px; padding: 8px 12px; }
+  .market { height: 126px; min-height: 126px; max-height: 126px; overflow: hidden; }
+  .market-grid { grid-template-columns: 86px repeat(5, minmax(112px, 1fr)); min-width: 650px; }
+  .market-cell, .market-label { min-height: 29px; padding: 4px 8px; }
+  .market-cell.market-artist { min-height: 38px; font-size: .9rem; }
+  .market-cell.round-count { min-height: 48px; }
+  .round-cell > strong { font-size: 1.05rem; }
+  .market-progress i { width: 13px; height: 4px; }
+  .table {
+    min-height: 0;
+    height: auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 390px);
+    grid-template-rows: minmax(260px, 1fr) 150px;
+    grid-template-areas: "stage handrail" "players handrail";
+    gap: 8px;
+    padding: 0;
+    overflow: hidden;
+  }
+  .stage { grid-area: stage; height: auto; min-height: 0; max-height: none; padding: 10px 14px; overflow: hidden; }
+  .stage-inner { width: 100%; }
+  .stage-layout { height: 100%; grid-template-columns: minmax(390px, 1fr) minmax(220px, 300px); gap: clamp(14px, 2.5vw, 30px); }
+  .auction-focus { grid-template-columns: 150px minmax(220px, 1fr); column-gap: 16px; }
+  .auction-lot { min-height: 166px; }
+  .auction-card { width: 124px; height: 158px; margin-bottom: 6px; padding: 9px; border-width: 6px; }
+  .auction-lot.is-pair { padding-right: 30px; }
+  .auction-lot.is-pair .auction-card + .auction-card { margin-left: -50px; transform: translate(32px, 8px) rotate(4deg); }
+  .auction-focus > h2 { font-size: 1.25rem; line-height: 1.05; }
+  .auction-focus > .instruction { margin: 3px 0 7px; }
+  .instruction { font-size: .82rem; line-height: 1.25; }
+  .auction-focus > .actions, .auction-focus > .bid-row { padding: 5px 8px; border-radius: 999px; background: color-mix(in srgb, var(--gold) 9%, transparent); }
+  .live-actions { height: 42px; min-height: 42px; max-height: 42px; margin-top: 6px; padding: 5px 9px; font-size: .62rem; }
+  .value-forecast { max-width: 300px; padding: 12px 14px; }
+  .forecast-now strong { font-size: 1.45rem; }
+  .forecast-now span { font-size: .94rem; }
+  .possible-values { margin-top: 7px; }
+  #opponents {
+    grid-area: players;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 7px;
+    overflow: hidden;
+  }
+  .player { height: 150px; min-height: 150px; max-height: 150px; padding: 8px 9px; overflow: hidden; }
+  .player-profile { gap: 7px; }
+  .avatar-wrap, .you-avatar { flex-basis: 36px; width: 36px; height: 36px; }
+  .player-head strong { font-size: .82rem; }
+  .player-copy small { font-size: .64rem; }
+  .cash { min-width: 54px; padding: 5px 8px; font-size: .92rem; }
+  .player-event { height: 38px; min-height: 38px; max-height: 38px; flex-basis: 38px; font-size: .58rem; }
+  .collection { max-height: 34px; min-height: 34px; margin-top: 5px; gap: 3px; overflow: hidden; }
+  .collection .mini-art { width: 27px; height: 34px; border-width: 2px; }
+  #you {
+    grid-area: handrail;
+    min-height: 0;
+    height: 100%;
+    max-height: none;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 8px;
+    overflow: hidden;
+    padding: 10px;
+    border-width: 2px;
+  }
+  #you.current-hand { box-shadow: 0 0 0 4px rgba(220,166,82,.2), 0 8px 24px rgba(182,121,50,.16); }
+  #you .owned-panel { margin: 0; padding: 8px; }
+  #you .owned-cards { max-height: 78px; overflow-y: auto; align-content: start; }
+  #you .owned-cards .mini-art { width: 36px; height: 46px; }
+  #you .hand-panel { min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); overflow: hidden; }
+  #you .hand-heading { align-items: start; margin-bottom: 4px; }
+  #you .hand-heading strong { font-size: .92rem; }
+  #you .section-note { display: none; }
+  #you .hand {
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(74px, 1fr));
+    align-content: start;
+    gap: 7px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 5px 2px 8px;
+    scroll-snap-type: none;
+  }
+  #you .hand-card { width: 100%; min-width: 0; height: auto; aspect-ratio: 2 / 2.62; flex-basis: auto; border-width: 4px; padding: 6px; }
+  #you .hand-card .card-artist { font-size: .68rem; line-height: 1.05; }
+  #you .hand-card .card-type { left: 5px; right: 5px; bottom: 5px; grid-template-columns: 16px 1fr; font-size: .52rem; }
+  #you .hand-card .card-type b { font-size: .78rem; }
+  .game-footer { display: none; }
+}
+
+@media (min-width: 900px) and (max-height: 760px) {
+  .game { gap: 6px; padding-top: 8px; padding-bottom: 8px; }
+  .topbar { height: 40px; min-height: 40px; max-height: 40px; }
+  .topbar h1 { font-size: 1.9rem; }
+  .market { height: 108px; min-height: 108px; max-height: 108px; }
+  .market-cell, .market-label { min-height: 25px; padding-top: 3px; padding-bottom: 3px; }
+  .market-cell.market-artist { min-height: 34px; }
+  .market-cell.round-count { min-height: 40px; }
+  .table { grid-template-rows: minmax(232px, 1fr) 132px; }
+  .auction-card { width: 104px; height: 132px; }
+  .auction-lot { min-height: 140px; }
+  .value-forecast { padding: 10px 12px; }
+  .player { height: 132px; min-height: 132px; max-height: 132px; }
+  .player-event { height: 30px; min-height: 30px; max-height: 30px; flex-basis: 30px; }
+  .collection { max-height: 28px; min-height: 28px; }
+  .collection .mini-art { width: 23px; height: 29px; }
+  #you .hand { grid-template-columns: repeat(auto-fill, minmax(66px, 1fr)); gap: 6px; }
+}
+
+/* Cockpit v2: trigger earlier so ordinary browser zoom/window sizes do not bury the hand. */
+@media (min-width: 720px) {
+  body { overflow: hidden; }
+  .game {
+    width: 100%;
+    max-width: none;
+    height: 100dvh;
+    display: grid;
+    grid-template-rows: 42px 116px minmax(0, 1fr);
+    gap: 7px;
+    padding: 6px 12px 8px;
+    overflow: hidden;
+  }
+  .topbar {
+    height: 42px;
+    min-height: 42px;
+    max-height: 42px;
+    margin: 0;
+    overflow: hidden;
+  }
+  .topbar h1 { font-size: clamp(1.65rem, 2.45vw, 2.35rem); line-height: .95; }
+  .topbar .eyebrow { display: none; }
+  .top-actions { gap: 6px; flex-wrap: nowrap; }
+  .quiet { min-height: 34px; padding: 7px 10px; font-size: .8rem; white-space: nowrap; }
+  .market {
+    height: 116px;
+    min-height: 116px;
+    max-height: 116px;
+    overflow: hidden;
+    border-radius: 10px;
+  }
+  .market-grid { grid-template-columns: 84px repeat(5, minmax(92px, 1fr)); min-width: 0; }
+  .market-cell, .market-label { min-height: 25px; padding: 3px 6px; }
+  .market-cell.market-artist { min-height: 35px; font-size: .84rem; }
+  .market-cell.round-count { min-height: 42px; }
+  .round-cell { gap: 2px; }
+  .round-cell > strong { font-size: .98rem; }
+  .market-progress i { width: 11px; height: 4px; }
+  .table {
+    min-height: 0;
+    height: auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(260px, 28vw, 350px);
+    grid-template-rows: minmax(230px, 1fr) 134px;
+    grid-template-areas: "stage handrail" "players handrail";
+    gap: 7px;
+    padding: 0;
+    overflow: hidden;
+  }
+  .stage {
+    grid-area: stage;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    padding: 9px 12px;
+    overflow: hidden;
+    border-radius: 12px;
+  }
+  .stage-inner { width: 100%; height: 100%; }
+  .stage-layout {
+    height: 100%;
+    grid-template-columns: minmax(330px, 1fr) minmax(190px, 260px);
+    gap: clamp(10px, 2vw, 24px);
+  }
+  .auction-focus { grid-template-columns: 132px minmax(185px, 1fr); column-gap: 14px; }
+  .auction-source { margin-bottom: 3px; padding: 4px 9px 4px 5px; }
+  .auction-source strong { font-size: .78rem; }
+  .auction-source small { font-size: .6rem; }
+  .persona-avatar.seller-avatar-photo { flex-basis: 34px; width: 34px; min-width: 34px; max-width: 34px; height: 34px; min-height: 34px; max-height: 34px; }
+  .auction-lot { min-height: 144px; }
+  .auction-card { width: 108px; height: 138px; margin-bottom: 4px; padding: 7px; border-width: 5px; }
+  .auction-lot.is-pair { padding-right: 26px; }
+  .auction-lot.is-pair .auction-card + .auction-card { margin-left: -45px; transform: translate(28px, 7px) rotate(4deg); }
+  .auction-focus > h2 { margin: 0; font-size: 1.15rem; line-height: 1.05; }
+  .instruction { margin-bottom: 6px; font-size: .78rem; line-height: 1.22; }
+  .auction-focus > .actions, .auction-focus > .bid-row {
+    padding: 4px 7px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--gold) 9%, transparent);
+  }
+  .bid-row input { width: 80px; min-height: 34px; padding: 6px 9px; }
+  .bid-row button, .actions button { min-height: 34px; padding: 7px 10px; }
+  .live-actions {
+    height: 38px;
+    min-height: 38px;
+    max-height: 38px;
+    margin-top: 4px;
+    padding: 4px 8px;
+    font-size: .57rem;
+    line-height: 1.1;
+  }
+  .value-forecast {
+    max-width: 260px;
+    padding: 10px 12px;
+    border-radius: 10px;
+  }
+  .value-forecast .eyebrow { font-size: .56rem; }
+  .forecast-now { margin: 4px 0 0; }
+  .forecast-now strong { font-size: 1.25rem; }
+  .forecast-now span { font-size: .82rem; }
+  .value-forecast > p:not(.eyebrow) { font-size: .66rem; line-height: 1.22; }
+  .possible-values { margin: 6px 0 4px; gap: 4px; }
+  .possible-values span { padding: 5px 2px; }
+  .possible-values small { display: none; }
+  #opponents {
+    grid-area: players;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    overflow: hidden;
+  }
+  .player {
+    height: 134px;
+    min-height: 134px;
+    max-height: 134px;
+    padding: 7px 8px;
+    overflow: hidden;
+    border-radius: 11px;
+  }
+  .player-profile { gap: 6px; }
+  .avatar-wrap, .you-avatar { flex-basis: 34px; width: 34px; height: 34px; }
+  .player-head strong { font-size: .78rem; }
+  .player-copy small { font-size: .6rem; }
+  .cash { min-width: 48px; padding: 4px 7px; font-size: .85rem; }
+  .player-event {
+    height: 30px;
+    min-height: 30px;
+    max-height: 30px;
+    flex-basis: 30px;
+    margin-top: 5px;
+    padding: 3px 6px;
+    font-size: .54rem;
+  }
+  .collection { min-height: 28px; max-height: 28px; margin-top: 4px; gap: 3px; overflow: hidden; }
+  .collection .mini-art { width: 23px; height: 29px; border-width: 2px; }
+  .collection .mini-art b { font-size: .38rem; }
+  #you {
+    grid-area: handrail;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 7px;
+    overflow: hidden;
+    padding: 8px;
+    border-width: 2px;
+    border-radius: 12px;
+  }
+  #you .owned-panel { margin: 0; padding: 7px; }
+  #you .owned-cards { max-height: 64px; overflow-y: auto; align-content: start; }
+  #you .owned-cards .mini-art { width: 31px; height: 40px; }
+  #you .hand-panel {
+    min-height: 0;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    overflow: hidden;
+  }
+  #you .hand-heading { align-items: start; margin-bottom: 3px; }
+  #you .hand-heading strong { font-size: .86rem; }
+  #you .hand-heading span { font-size: .68rem; }
+  #you .section-note { display: none; }
+  #you .hand {
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+    align-content: start;
+    gap: 6px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 4px 2px 7px;
+    scroll-snap-type: none;
+  }
+  #you .hand-card {
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    aspect-ratio: 2 / 2.62;
+    flex-basis: auto;
+    border-width: 3px;
+    padding: 5px;
+  }
+  #you .hand-card .card-artist { font-size: .62rem; line-height: 1.05; }
+  #you .hand-card .card-type { left: 4px; right: 4px; bottom: 4px; grid-template-columns: 14px 1fr; font-size: .48rem; }
+  #you .hand-card .card-type b { font-size: .7rem; }
+  .game-footer { display: none; }
+}
+
+@media (min-width: 720px) and (max-width: 1060px) {
+  .stage-layout { grid-template-columns: 1fr; }
+  .value-forecast { display: none; }
+  .auction-focus { width: min(580px, 100%); margin: 0 auto; }
+}
+
+/* Persona clarity pass: the tiny corner badges were too small to be useful in play. */
+.player .persona-avatar.cartoon-avatar::before,
+.auction-source .persona-avatar.cartoon-avatar::before {
+  display: none !important;
+}
+.player .persona-avatar.cartoon-avatar,
+.auction-source .persona-avatar.cartoon-avatar {
+  overflow: hidden;
+  border-color: #fffaf0;
+  box-shadow: 0 2px 9px rgba(45,38,28,.16), inset 0 0 0 2px rgba(255,255,255,.25);
+}
+.player .persona-avatar.cartoon-avatar .toon-face,
+.auction-source .persona-avatar.cartoon-avatar .toon-face {
+  transform: translate(5px, 5px) scale(1.18);
+}
+.player .persona-avatar.cartoon-avatar .toon-hair,
+.auction-source .persona-avatar.cartoon-avatar .toon-hair {
+  filter: drop-shadow(0 1px rgba(0,0,0,.18));
+}
+
+/* Award tiles: clearer than tiny symbols, closer to an end-of-round highlight reel. */
+.round-awards {
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+.round-award {
+  min-height: 142px;
+  padding: 15px;
+  border-width: 2px;
+  background:
+    radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--award) 24%, transparent), transparent 46%),
+    linear-gradient(145deg, color-mix(in srgb, var(--panel) 82%, var(--award)), var(--paper));
+}
+.round-award.rare-award {
+  border-color: color-mix(in srgb, var(--award) 68%, #d8aa37);
+}
+.round-award-head {
+  align-items: flex-start;
+}
+.round-award-icon {
+  width: 50px;
+  height: 42px;
+  flex-basis: 50px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--award), white 58%), color-mix(in srgb, var(--award), black 8%));
+  color: #1f1b16;
+  font-size: .58rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  text-shadow: none;
+}
+.round-award small {
+  padding-top: 2px;
+  font-size: .66rem;
+}
+.round-award strong {
+  font-size: 1.08rem;
+}
+.round-award p {
+  font-size: .82rem;
+}
+.rare-tag {
+  background: #211d17;
+  color: #f0c96a;
+  border-color: #f0c96a;
+}
+
 </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.5/peerjs.min.js" integrity="sha512-XEKeWX+mI3Ov+tg2evDlVQFzVOIp4T8J3cNcCEPaEUGpxJV3eZaN8rHuvnFPvQpGJBHPmrozJDMpm2xcDvtmyQ==" crossorigin="anonymous"></script>
 </head>
@@ -628,6 +1242,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
         <span><b>2. Auction</b><small>Buy low, sell high</small></span>
         <span><b>3. Score</b><small>Back the hottest artists</small></span>
       </div>
+      <section id="hall-of-fame" class="hall-of-fame hidden" aria-label="Hall of Fame"></section>
       <div class="setup-grid">
         <label>Your name
           <input id="player-name" maxlength="20" value="You" placeholder="Your name">
@@ -767,7 +1382,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script>
-const VERSION = "0.36.0";
+const VERSION = "0.41.0";
 const TYPES = {
   open: { icon: "👋", name: "Open bidding", short: "Raise or pass", copy: "Players take turns raising the bid. Once you pass, you are out." },
   once: { icon: "✋", name: "One offer", short: "One bid each", copy: "Each player gets exactly one bid, going clockwise." },
@@ -966,6 +1581,63 @@ function learnLocal(action, amount = 0) {
   if (action === "bids") profile.totalBid += amount;
   localStorage.setItem("modern-art-persona-profiles", JSON.stringify(profiles));
 }
+
+function loadHallOfFame() {
+  try { return JSON.parse(localStorage.getItem("modern-art-hall-of-fame") || "[]"); }
+  catch { return []; }
+}
+
+function saveHallOfFame(entries) {
+  localStorage.setItem("modern-art-hall-of-fame", JSON.stringify(entries.slice(0, 20)));
+}
+
+function recordHallOfFame(result) {
+  if (!result?.gameover || result.hallRecorded) return;
+  const winner = result.standings?.[0];
+  if (!winner) return;
+  const entry = {
+    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    date: new Date().toISOString(),
+    winner: winner.name,
+    score: winner.cash,
+    margin: winner.cash - (result.standings?.[1]?.cash || winner.cash),
+    players: result.standings.map(row => ({ name: row.name, score: row.cash, place: row.place })),
+    awards: state.history.filter(item => item.kind === "round").flatMap(item => item.awards || []).length
+  };
+  const entries = [entry, ...loadHallOfFame()]
+    .sort((a, b) => b.score - a.score || b.margin - a.margin || new Date(b.date) - new Date(a.date));
+  saveHallOfFame(entries);
+  result.hallRecorded = true;
+  renderHallOfFame();
+}
+
+function renderHallOfFame() {
+  const hall = $("#hall-of-fame");
+  if (!hall) return;
+  const entries = loadHallOfFame();
+  hall.classList.toggle("hidden", !entries.length);
+  if (!entries.length) return;
+  const best = entries[0];
+  const recent = [...entries].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 3);
+  hall.innerHTML = `
+    <div class="hall-head">
+      <div><p class="eyebrow">Lobby legends</p><h2>Hall of Fame</h2></div>
+      <span>${entries.length} finished game${entries.length === 1 ? "" : "s"} saved here</span>
+    </div>
+    <div class="hall-best">
+      <small>Highest score</small>
+      <strong>${best.winner}</strong>
+      <b>${money(best.score)}</b>
+      <span>${best.margin ? `${money(best.margin)} win margin` : "won by table drama"}</span>
+    </div>
+    <div class="hall-list">${recent.map((entry, index) => `<div class="hall-row">
+      <span>${index + 1}</span>
+      <strong>${entry.winner}</strong>
+      <b>${money(entry.score)}</b>
+      <small>${new Date(entry.date).toLocaleDateString([], { month: "short", day: "numeric" })}</small>
+    </div>`).join("")}</div>`;
+}
+
 function personaQuip(p, kind) {
   if (!(state.banter ?? state.familyBanter) || isLocalPlayer(p)) return "";
   const voice = PERSONA_VOICE[p.characterKey === "dad" ? "al" : p.characterKey];
@@ -1462,29 +2134,29 @@ function makeRoundAwards(round, payouts, triggerCard) {
   const purchaseText = item => `${artist(item.artist).name}${item.quantity > 1 ? ` ×${item.quantity}` : ""}`;
   return [
     {
-      icon: "♛", title: "Round MVP", name: mvp.name, color: "#d8aa37",
+      icon: "MVP", title: "Round MVP", name: mvp.name, color: "#d8aa37",
       detail: `earned ${money(payouts[mvp.name] || 0)} from paintings this round`
     },
     {
-      icon: "★", title: "Best Buy", name: bestBuy?.buyer || "No buyer", color: "#48bda8",
+      icon: "DEAL", title: "Best Buy", name: bestBuy?.buyer || "No buyer", color: "#48bda8",
       detail: bestBuy ? `${purchaseText(bestBuy)} for ${money(bestBuy.price)}, worth ${money(valueOf(bestBuy))}` : "No paintings were purchased"
     },
     {
-      icon: "✓", title: "Closer", name: closer, color: "#56b9df",
+      icon: "END", title: "Closer", name: closer, color: "#56b9df",
       detail: `played the 5th ${artist(triggerCard.artist).name} and ended the round`
     },
     {
-      icon: "↓", title: "Biggest Overpay", name: overpay && overpay.price > valueOf(overpay) ? overpay.buyer : "Nobody", color: "#e87373",
+      icon: "OUCH", title: "Biggest Overpay", name: overpay && overpay.price > valueOf(overpay) ? overpay.buyer : "Nobody", color: "#e87373",
       detail: overpay && overpay.price > valueOf(overpay)
         ? `${purchaseText(overpay)} for ${money(overpay.price)}, worth ${money(valueOf(overpay))}`
         : "Every purchase finished at or above its price"
     },
     {
-      icon: "▲", title: "Smooth Operator", name: smooth?.seller || "No seller", color: "#99c957",
+      icon: "SALE", title: "Smooth Operator", name: smooth?.seller || "No seller", color: "#99c957",
       detail: smooth ? `sold ${purchaseText(smooth)} for the round-high ${money(smooth.price)}` : "No paid sales this round"
     },
     {
-      icon: "Ø", title: "Window Shopper", name: shoppers.length ? shoppers.join(", ") : "Everyone bought", color: "#e1b34f",
+      icon: "LOOK", title: "Window Shopper", name: shoppers.length ? shoppers.join(", ") : "Everyone bought", color: "#e1b34f",
       detail: shoppers.length ? "finished the round without buying a painting" : "every player made at least one purchase"
     }
   ];
@@ -1520,49 +2192,49 @@ function makeAwardShowcase(round, payouts, triggerCard, holdings = {}) {
     .sort((a, b) => (payouts[a.name] || 0) - (payouts[b.name] || 0))[0];
   const awards = [
     {
-      icon: "♕", title: "Round MVP", name: mvp.name, color: "#d8aa37", rarity: (payouts[mvp.name] || 0) >= 90,
+      icon: "MVP", title: "Round MVP", name: mvp.name, color: "#d8aa37", rarity: (payouts[mvp.name] || 0) >= 90,
       detail: `best round overall, collected ${money(payouts[mvp.name] || 0)} from paintings`
     },
     {
-      icon: "★", title: "Best Buy", name: bestBuy?.buyer || "No buyer", color: "#48bda8", rarity: !!bestBuy && profitOf(bestBuy) >= 30,
+      icon: "DEAL", title: "Best Buy", name: bestBuy?.buyer || "No buyer", color: "#48bda8", rarity: !!bestBuy && profitOf(bestBuy) >= 30,
       detail: bestBuy ? `${purchaseText(bestBuy)} for ${money(bestBuy.price)}, now worth ${money(valueOf(bestBuy))} (${profitOf(bestBuy) >= 0 ? "+" : ""}${money(profitOf(bestBuy))})` : "No paintings were purchased"
     },
     {
-      icon: "✓", title: "Closer", name: closer, color: "#56b9df", rarity: true,
+      icon: "END", title: "Closer", name: closer, color: "#56b9df", rarity: true,
       detail: `played the 5th ${artist(triggerCard.artist).name} painting that ended the round`
     },
     {
-      icon: "▰", title: "Lane King", name: laneKing?.name || "No deep lane", color: "#c6a16a", rarity: !!laneKing && laneKing.count >= 4,
+      icon: "LANE", title: "Lane King", name: laneKing?.name || "No deep lane", color: "#c6a16a", rarity: !!laneKing && laneKing.count >= 4,
       detail: laneKing ? `held ${laneKing.count} ${artist(laneKing.artist).name} paintings at round end` : "Nobody stacked multiple paintings of one artist"
     },
     {
-      icon: "⇅", title: "Pump and Dump", name: pump?.seller || "Nobody", color: "#b68ce0", rarity: !!pump,
+      icon: "FLIP", title: "Pump and Dump", name: pump?.seller || "Nobody", color: "#b68ce0", rarity: !!pump,
       detail: pump ? `sold ${purchaseText(pump)} to ${pump.buyer} for ${money(pump.price)} while holding none` : "No seller escaped a hot artist cleanly"
     },
     {
-      icon: "◉", title: "Window Shopper", name: shoppers.length ? shoppers.join(", ") : "Everyone bought", color: "#e1b34f", rarity: shoppers.length >= Math.max(2, state.players.length - 1),
+      icon: "LOOK", title: "Window Shopper", name: shoppers.length ? shoppers.join(", ") : "Everyone bought", color: "#e1b34f", rarity: shoppers.length >= Math.max(2, state.players.length - 1),
       detail: shoppers.length ? "watched the whole round without buying a painting" : "every player made at least one purchase"
     }
   ];
   if (overpay && overpay.price > valueOf(overpay)) {
     awards.push({
-      icon: "↓", title: "Biggest Overpay", name: overpay.buyer, color: "#e87373", rarity: overpay.price - valueOf(overpay) >= 20,
+      icon: "OUCH", title: "Biggest Overpay", name: overpay.buyer, color: "#e87373", rarity: overpay.price - valueOf(overpay) >= 20,
       detail: `${purchaseText(overpay)} for ${money(overpay.price)}, only worth ${money(valueOf(overpay))} (${money(valueOf(overpay) - overpay.price)})`
     });
   } else if (collector?.count) {
     awards.push({
-      icon: "▲", title: "Gallery Builder", name: collector.name, color: "#99c957", rarity: collector.count >= 5,
+      icon: "BUILD", title: "Gallery Builder", name: collector.name, color: "#99c957", rarity: collector.count >= 5,
       detail: `ended the round holding ${collector.count} painting${collector.count === 1 ? "" : "s"}`
     });
   }
   if (smooth) {
     awards.push({
-      icon: "◆", title: "Smooth Operator", name: smooth.seller, color: "#7cc17f", rarity: smooth.price >= 50,
+      icon: "SALE", title: "Smooth Operator", name: smooth.seller, color: "#7cc17f", rarity: smooth.price >= 50,
       detail: `sold ${purchaseText(smooth)} for the round-high ${money(smooth.price)}`
     });
   } else if (cold?.count) {
     awards.push({
-      icon: "×", title: "Cold Storage", name: cold.name, color: "#93a1b1", rarity: false,
+      icon: "COLD", title: "Cold Storage", name: cold.name, color: "#93a1b1", rarity: false,
       detail: `held paintings but only earned ${money(payouts[cold.name] || 0)} this round`
     });
   }
@@ -1722,6 +2394,7 @@ function renderRoundResults() {
   const season = $("#season-summary");
   season.classList.toggle("hidden", !result.gameover);
   if (result.gameover) {
+    recordHallOfFame(result);
     const champion = result.standings[0];
     const margin = champion.cash - (result.standings[1]?.cash || 0);
     const roundRecaps = state.history.filter(item => item.kind === "round" && item.awards?.length);
@@ -2376,6 +3049,7 @@ $("#round-results-close").onclick = () => {
   if (!$("#new-cards-dialog").open && isComputer(current()) && networkMode !== "guest") setTimeout(aiChoose, aiDelay());
 };
 renderStaticGuide();
+renderHallOfFame();
 document.querySelectorAll("[data-version]").forEach(el => el.textContent = `v${VERSION}`);
 if (localStorage.getItem("gallery-auction-save-v2")) $("#continue-game").classList.remove("hidden");
 const savedPlayerName = localStorage.getItem("modern-art-player-name");
