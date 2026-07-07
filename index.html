@@ -478,17 +478,17 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
   #you { order: 2; }
   #opponents { order: 3; }
   .stage-layout { grid-template-columns: 1fr; gap: 8px; }
-  .auction-focus { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 6px 10px; align-items: center; text-align: left; }
+  .auction-focus { display: grid; grid-template-columns: 82px minmax(0, 1fr); gap: 5px 9px; align-items: center; text-align: left; }
   .auction-source { grid-column: 1 / -1; justify-self: start; max-width: 100%; padding: 4px 9px 4px 5px; white-space: normal; border-radius: 14px; }
   .auction-source .persona-avatar { flex-basis: 30px; width: 30px; min-width: 30px; height: 30px; }
   .auction-source small { font-size: .63rem; }
   .auction-lot { grid-column: 1; grid-row: span 4; align-self: start; }
   .auction-focus > h2, .auction-focus > .instruction, .auction-focus > .bid-row, .auction-focus > .actions, .auction-focus > .auction-copy, .auction-focus > .live-actions { grid-column: 2; }
   .auction-focus > h2 { margin: 0; font-size: 1.08rem; line-height: 1.1; }
-  .auction-card { width: 88px; height: 118px; border-width: 4px; margin: 0; padding: 7px; }
+  .auction-card { width: 78px; height: 104px; border-width: 4px; margin: 0; padding: 6px; }
   .auction-card > strong { font-size: .7rem; }
   .auction-card .type { font-size: .66rem; line-height: 1.05; }
-  .auction-lot.is-pair .auction-card + .auction-card { margin-left: -42px; transform: translate(30px, 9px) rotate(4deg); }
+  .auction-lot.is-pair .auction-card + .auction-card { margin-left: -38px; transform: translate(26px, 8px) rotate(4deg); }
   .instruction { margin-bottom: 6px; font-size: .78rem; line-height: 1.25; }
   .thinking-note { display: none; }
   .turn-guidance { margin-bottom: 4px; padding: 4px 8px; font-size: .58rem; }
@@ -497,7 +497,7 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
   .bid-row button, .actions button { min-height: 38px; padding: 8px 11px; }
   .actions { justify-content: flex-start; margin-top: 7px; }
   .live-actions { grid-column: 1 / -1 !important; height: 38px; min-height: 38px; max-height: 38px; padding: 5px 8px; font-size: .6rem; }
-  .value-forecast { grid-column: 1 / -1; width: 100%; padding: 9px 10px; border-top-width: 4px; }
+  .value-forecast { display: none; }
   .value-forecast .eyebrow { font-size: .58rem; }
   .forecast-now { margin: 5px 0; }
   .forecast-now strong { font-size: 1.2rem; }
@@ -541,9 +541,11 @@ dialog::backdrop { background: rgba(31,28,24,.56); backdrop-filter: blur(3px); }
   .topbar { display: grid; gap: 8px; }
   .top-actions { justify-content: flex-start; }
   .quiet { min-height: 34px; padding: 6px 8px; }
-  .auction-focus { grid-template-columns: 84px minmax(0, 1fr); gap: 6px 9px; }
-  .auction-card { width: 80px; height: 108px; }
+  .auction-focus { grid-template-columns: 78px minmax(0, 1fr); gap: 5px 8px; }
+  .auction-card { width: 74px; height: 100px; }
   .auction-focus > h2 { font-size: 1rem; }
+}
+@media (max-width: 350px) {
   .hand { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .opponents { grid-template-columns: 1fr; }
 }
